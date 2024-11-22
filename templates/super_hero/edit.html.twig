@@ -1,21 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier le Super-Héros{% endblock %}
+{% block title %}Edit SuperHero{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center text-primary">Modifier le Super-Héros</h1>
+    <h1>Edit SuperHero</h1>
 
-    <div class="mt-4">
-        {{ include('super_hero/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
-    </div>
+    {{ include('super_hero/_form.html.twig', {'button_label': 'Update'}) }}
 
-    <div class="mt-3 d-flex justify-content-between">
-        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Retour à la liste
-        </a>
+    <a href="{{ path('app_super_hero_index') }}" class="text-light" >back to list</a>
 
-        {{ include('super_hero/_delete_form.html.twig') }}
-    </div>
-</div>
+    {{ include('super_hero/_delete_form.html.twig') }}
 {% endblock %}

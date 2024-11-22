@@ -7,13 +7,23 @@
 
                 {# Si le champ est "isActive", on le rend sous forme de switch #}
                 {% if field.vars.name == 'isActive' %}
-                    <div class="form-check form-switch">
-                        {# Ajout d'une largeur personnalisée pour éviter que le switch prenne toute la largeur #}
-                        {{ form_widget(field, {'attr': {'class': 'form-check-input', 'style': 'width:auto;', 'id': field.vars.id}}) }}
-                        <label class="form-check-label" for="{{ field.vars.id }}">
-                            {{ form_label(field) }}
-                        </label>
+                {% if field.vars.name == 'isActive' %}
+                <div class="form-group">
+                    <label for="{{ field.vars.id }}">Activer le super-héros</label>
+                    {{ form_widget(field, {'attr': {'type': 'number', 'min': 0, 'max': 1, 'step': 0.01, 'class': 'form-control', 'id': field.vars.id}}) }}
+                </div>
+            {% else %}
+                {{ form_widget(field) }}
+            {% endif %}
+                
+                {# Si le champ est "teams", on le rend sous forme de cases à cocher #}
+                {% elseif field.vars.name == 'teams' %}
+                    <div class="d-flex flex-wrap">
+                        {{ form_widget(field, {'attr': {'class': 'form gap-2'}}) }}
+                        {{ form_errors(field) }}
                     </div>
+
+                {# Sinon, on utilise un champ classique #}
                 {% else %}
                     {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
                 {% endif %}

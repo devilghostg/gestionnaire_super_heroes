@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SuperHeroRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -28,6 +30,15 @@ class SuperHero
 
     #[ORM\Column]
     private ?bool $is_active = null;
+
+    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'superHeroes')]
+    #[ORM\JoinTable(name: 'superhero_team')] // Table pivot pour la relation ManyToMany
+    private Collection $teams;
+
+    public function __construct()
+    {
+        $this->teams = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -86,11 +97,35 @@ class SuperHero
     {
         return $this->is_active;
     }
-    
+
     public function setIsActive(bool $is_active): static
     {
         $this->is_active = $is_active;
-    
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Team>
+     */
+    public function getTeams(): Collection
+    {
+        return $this->teams;
+    }
+
+    public function addTeam(Team $team): static
+    {
+        if (!$this->teams->contains($team)) {
+            $this->teams->add($team);
+        }
+
+        return $this;
+    }
+
+    public function removeTeam(Team $team): static
+    {
+        $this->teams->removeElement($team);
+
         return $this;
     }
 }

@@ -3,40 +3,96 @@
 {% block title %}SuperHero{% endblock %}
 
 {% block body %}
-    <h1>SuperHero</h1>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg shadow-lg">
+            <h1 class="display-4 text-warning font-weight-bold text-shadow">Super-Héros Détails</h1>
+            <p class="lead text-light">Explorez les détails du super-héros et apprenez-en davantage sur ses capacités et ses faiblesses !</p>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ super_hero.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ super_hero.name }}</td>
-            </tr>
-            <tr>
-                <th>Alias</th>
-                <td>{{ super_hero.alias }}</td>
-            </tr>
-            <tr>
-                <th>Power</th>
-                <td>{{ super_hero.power }}</td>
-            </tr>
-            <tr>
-                <th>Weakness</th>
-                <td>{{ super_hero.weakness }}</td>
-            </tr>
-            <tr>
-                <th>Is_active</th>
-                <td>{{ super_hero.isActive ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <!-- Contenu principal -->
+        <div class="col-md-9">
+            <!-- Informations principales -->
+            <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
+                <div class="text-center">
+                    <p class="lead text-light font-italic">Voici les informations complètes de votre héros !</p>
+                </div>
+            </div>
 
-    <a href="{{ path('app_super_hero_index') }}">back to list</a>
+            <!-- Détails du super-héros -->
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-body">
+                    <h5 class="card-title text-primary text-center">Détails de : {{ super_hero.name }}</h5>
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Id</th>
+                                <td>{{ super_hero.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <td>{{ super_hero.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Alias</th>
+                                <td>{{ super_hero.alias }}</td>
+                            </tr>
+                            <tr>
+                                <th>Pouvoir</th>
+                                <td>{{ super_hero.power }}</td>
+                            </tr>
+                            <tr>
+                                <th>Faiblesse</th>
+                                <td>{{ super_hero.weakness }}</td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>
+                                    {% if super_hero.isActive %}
+                                        <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactif</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Équipes</th>
+                                <td>
+                                    {% if super_hero.teams|length > 0 %}
+                                        <ul class="list-unstyled">
+                                            {% for team in super_hero.teams %}
+                                                <li><i class="bi bi-shield-fill text-primary"></i> {{ team.name }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <span class="text-muted">Aucune équipe assignée</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}">edit</a>
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left-circle"></i> Retour à la liste
+                        </a>
+                        <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-    {{ include('super_hero/_delete_form.html.twig') }}
+            <!-- Formulaire de suppression -->
+            <div class="card mt-4 border-0 shadow-lg">
+                <div class="card-body text-center">
+                    <p class="text-danger font-weight-bold">Attention : Cette action est irréversible.</p>
+                    {{ include('super_hero/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
