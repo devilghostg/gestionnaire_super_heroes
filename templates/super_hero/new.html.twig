@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New SuperHero{% endblock %}
+
+{% block body %}
+    <h1>Create new SuperHero</h1>
+
+    {{ include('super_hero/_form.html.twig') }}
+
+    <a href="{{ path('app_super_hero_index') }}">back to list</a>
+{% endblock %}

@@ -1,3 +1,48 @@
 body {
-    background-color: skyblue;
+    background-color: black;
+}
+
+/* index.html.twig  */
+
+/* Arrière-plan dynamique de la sidebar */
+.superhero-sidebar {
+    background: linear-gradient(135deg, #ff5733, #f39c12);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Arrière-plan dynamique du contenu principal */
+.superhero-background {
+    background: linear-gradient(145deg, #2d2d2d, #3e3e3e);
+    color: #fff;
+}
+
+/* Ombre de texte pour donner un effet héroïque */
+.text-shadow {
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Mise en forme du bouton pour avoir un effet héroïque */
+.btn-lg {
+    background-color: #ff5733;
+    border-color: #ff5733;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+}
+
+.btn-lg:hover {
+    background-color: #f39c12;
+    border-color: #f39c12;
+}
+
+/* Ajout d'une animation d'apparition pour les textes */
+@keyframes heroicAnimation {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+h1, p {
+    animation: heroicAnimation 1s ease-out forwards;
 }

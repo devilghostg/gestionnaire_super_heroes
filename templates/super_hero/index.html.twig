@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Super-Héros{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar gauche avec un fond héroïque -->
+            <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg">
+                <h1 class="display-4 text-warning font-weight-bold text-shadow">Nos Super-Héros</h1>
+                <p class="lead text-light">Voici une galerie de nos héros et héroïnes extraordinaires. Découvrez leur force et leur courage !</p>
+                <p class="lead text-light font-italic mt-4">Ils sont prêts à sauver le monde !</p>
+            </div>
+
+            <!-- Contenu principal à droite -->
+            <div class="col-md-9">
+                <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
+                    <div class="text-center">
+                        <p class="lead text-light font-italic">Explorez nos héros dans cette galerie</p>
+                        <div class="text-center mt-4">
+                            <a href="#" class="btn btn-danger btn-lg">Voir plus de héros</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des Super-Héros sous forme de Cards -->
+                <div class="row">
+                    {% for super_hero in super_heroes %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card shadow-sm border-0 rounded-lg h-100">
+                                {# <img src="{{ super_hero.image_url }}" class="card-img-top" alt="{{ super_hero.name }}" style="object-fit: cover; height: 200px;"> #}
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">{{ super_hero.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ super_hero.alias }}</h6>
+                                    <p class="card-text">
+                                        <strong>Pouvoir :</strong> <span class="text-success">{{ super_hero.power }}</span><br>
+                                        <strong>Faiblesse :</strong> <span class="text-danger">{{ super_hero.weakness }}</span><br>
+                                        <strong>Statut :</strong>
+                                        {% if super_hero.isActive %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactif</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="card-footer text-muted d-flex justify-content-between">
+                                    <a href="{{ path('app_super_hero_show', {'id': super_hero.id}) }}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-eye"></i> Voir
+                                    </a>
+                                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-warning btn-sm">
+                                        <i class="bi bi-pencil"></i> Modifier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-12 text-center">
+                            <em>Aucun super-héros trouvé.</em>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Bouton pour ajouter un Super-Héros -->
+                <div class="text-end mt-4">
+                    <a href="{{ path('app_super_hero_new') }}" class="btn btn-success">
+                        <i class="bi bi-person-plus-fill"></i> Ajouter un Super-Héros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

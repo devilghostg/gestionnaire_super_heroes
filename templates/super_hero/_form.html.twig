@@ -1,0 +1,29 @@
+<div class="card shadow-sm p-4">
+    {{ form_start(form) }}
+    <div class="row">
+        {% for field in form %}
+            <div class="col-md-6 mb-3">
+                {{ form_label(field, null, {'label_attr': {'class': 'form-label'}}) }}
+
+                {# Si le champ est "isActive", on le rend sous forme de switch #}
+                {% if field.vars.name == 'isActive' %}
+                    <div class="form-check form-switch">
+                        {# Ajout d'une largeur personnalisée pour éviter que le switch prenne toute la largeur #}
+                        {{ form_widget(field, {'attr': {'class': 'form-check-input', 'style': 'width:auto;', 'id': field.vars.id}}) }}
+                        <label class="form-check-label" for="{{ field.vars.id }}">
+                            {{ form_label(field) }}
+                        </label>
+                    </div>
+                {% else %}
+                    {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                {% endif %}
+
+                {{ form_errors(field) }}
+            </div>
+        {% endfor %}
+    </div>
+    <button class="btn btn-primary">
+        {{ button_label|default('Enregistrer') }}
+    </button>
+    {{ form_end(form) }}
+</div>
