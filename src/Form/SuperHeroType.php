@@ -1,12 +1,13 @@
 <?php
 namespace App\Form;
 
-use App\Entity\SuperHero;
 use App\Entity\Team;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Entity\SuperHero;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class SuperHeroType extends AbstractType
 {
@@ -29,10 +30,10 @@ class SuperHeroType extends AbstractType
                 'label' => 'Faiblesse',
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('isActive', null, [
+            ->add('is_active', CheckboxType::class, [
                 'label' => 'Est Actif',
-                'attr' => ['class' => 'form-check-input'],
                 'required' => false,
+                'attr' => ['class' => 'form-check-input'],
             ])
             ->add('teams', EntityType::class, [
                 'class' => Team::class,

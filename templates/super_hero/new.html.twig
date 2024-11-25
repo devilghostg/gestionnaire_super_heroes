@@ -3,9 +3,23 @@
 {% block title %}Nouvel Hero{% endblock %}
 
 {% block body %}
-    <h1>Créer mon SuperHero</h1>
-
-    {{ include('super_hero/_form.html.twig') }}
-
-    <a href="{{ path('app_super_hero_index') }}" class="btn btn primary my-4">back to list</a>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h1 class="h4 mb-0">Créer mon Super-Héros</h1>
+                </div>
+                <div class="card-body">
+                    {{ include('super_hero/_form.html.twig') }}
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left-circle"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

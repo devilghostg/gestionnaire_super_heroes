@@ -38,6 +38,7 @@ final class SuperHeroController extends AbstractController{
         return $this->render('super_hero/new.html.twig', [
             'super_hero' => $superHero,
             'form' => $form,
+            'button_label' => 'Enregistrer',
         ]);
     }
 
@@ -64,6 +65,7 @@ final class SuperHeroController extends AbstractController{
         return $this->render('super_hero/edit.html.twig', [
             'super_hero' => $superHero,
             'form' => $form,
+            'button_label' => $superHero->getId() ? 'Mettre à jour' : 'Enregistrer',
         ]);
     }
 

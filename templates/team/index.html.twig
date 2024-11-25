@@ -9,26 +9,31 @@
         <a href="{{ path('app_team_new') }}" class="btn btn-success">Create a new Team</a>
     </div>
 
-    <div class="row mt-4">
-        {% for team in teams %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ team.name }}</h5>
-                        <p class="card-text">{{ team.description }}</p>
-                        <h6>Superheroes:</h6>
-                        <ul>
-                            {% for super_hero in team.superHeroes %}
-                                <li>{{ super_hero.name }}</li>
-                            {% endfor %}
-                        </ul>
+    <!-- Formulaire de sélection ou de modification des équipes -->
+    <form action="{{ path('app_team_edit', {'id': team.id}) }}" method="post">
+        <div class="row mt-4">
+            {% for team in teams %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ team.name }}</h5>
+                            <p class="card-text">{{ team.description }}</p>
+                            <h6>Superheroes:</h6>
+                            <ul>
+                                {% for super_hero in team.superHeroes %}
+                                    <li>{{ super_hero.name }}</li>
+                                {% endfor %}
+                            </ul>
+                            <!-- Bouton de modification dans le formulaire -->
+                            <a href="{{ path('app_team_edit', {'id': team.id}) }}" class="btn btn-warning">Edit</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% else %}
-            <div class="col-12">
-                <p>No teams found.</p>
-            </div>
-        {% endfor %}
-    </div>
+            {% else %}
+                <div class="col-12">
+                    <p>No teams found.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </form>
 {% endblock %}

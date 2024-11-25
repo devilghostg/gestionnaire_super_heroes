@@ -19,21 +19,40 @@ class TeamController extends AbstractController
     {
         $team = new Team();
         $form = $this->createForm(TeamType::class, $team);
-
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             // Persist and flush the new team
             $entityManager->persist($team);
             $entityManager->flush();
-
+    
             return $this->redirectToRoute('app_team_index');
         }
-
+    
         return $this->render('team/new.html.twig', [
             'form' => $form->createView(),
+            'button_label' => 'Créer', // Ajout de la variable
         ]);
     }
+    #[Route('/team/{id}/edit', name: 'app_team_edit')]
+public function edit(Request $request, Team $team, EntityManagerInterface $entityManager): Response
+{
+    $form = $this->createForm(TeamType::class, $team);
+
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_team_index');
+    }
+
+    return $this->render('team/new.html.twig', [
+        'form' => $form->createView(),
+        'button_label' => 'Modifier', // Ajout de la variable pour le mode édition
+    ]);
+}
 
     #[Route('/team', name: 'app_team_index')]
     public function index(TeamRepository $teamRepository): Response
@@ -42,6 +61,7 @@ class TeamController extends AbstractController
 
         return $this->render('team/index.html.twig', [
             'teams' => $teams,
+            'button_label' => 'Créer',
         ]);
     }
 }

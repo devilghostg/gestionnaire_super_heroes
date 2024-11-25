@@ -28,8 +28,8 @@ class SuperHero
     #[ORM\Column(type: Types::TEXT)]
     private ?string $weakness = null;
 
-    #[ORM\Column]
-    private ?bool $is_active = null;
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $is_active = false;
 
     #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'superHeroes')]
     #[ORM\JoinTable(name: 'superhero_team')] // Table pivot pour la relation ManyToMany
@@ -92,16 +92,15 @@ class SuperHero
 
         return $this;
     }
-
-    public function isActive(): ?bool
+    public function isActive(): bool
     {
-        return $this->is_active;
+        return $this->is_active ?? false; 
     }
-
+    
     public function setIsActive(bool $is_active): static
     {
         $this->is_active = $is_active;
-
+    
         return $this;
     }
 
