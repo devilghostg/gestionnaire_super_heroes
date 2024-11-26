@@ -4,19 +4,48 @@
 
 {% block body %}
     <div class="container mt-5">
-        <h1>{{ button_label == 'Create' ? 'Créer' : 'Modifier' }} un Super-Héros</h1>
+        <div class="row">
+            <!-- Sidebar gauche avec un fond héroïque -->
+            <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg">
+                <h1 class="display-4 text-warning font-weight-bold text-shadow">Créer un Super-Héros</h1>
+                <p class="lead text-light">Complétez le formulaire pour ajouter un super-héros à notre équipe.</p>
+            </div>
 
-        {{ form_start(form) }}
-            <div class="card mb-4">
-                <div class="card-body">
-                    {{ form_widget(form) }}
+            <!-- Contenu principal à droite -->
+            <div class="col-md-9">
+                <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
+                    <div class="text-center">
+                        <p class="lead text-light font-italic">Créez ou modifiez un super-héros ci-dessous</p>
+                    </div>
+                </div>
+
+                <!-- Formulaire de création ou modification du Super-Héros -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3>{{ button_label == 'Create' ? 'Créer' : 'Modifier' }} un Super-Héros</h3>
+
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                <!-- Customisation de tous les inputs avec classes Bootstrap -->
+                                {% for field in form %}
+                                    <div class="mb-3">
+                                        {{ form_label(field, null, {'attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Retour à la liste -->
+                <div class="mt-3">
+                    <a href="{{ path('app_team_index') }}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left-circle"></i> Retour à la liste
+                    </a>
                 </div>
             </div>
-            <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
-        {{ form_end(form) }}
-
-        <div class="mt-3">
-            <a href="{{ path('app_super_hero_index') }}" class="btn btn-primary">Retour à la liste</a>
         </div>
     </div>
 {% endblock %}

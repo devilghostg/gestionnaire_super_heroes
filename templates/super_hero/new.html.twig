@@ -1,21 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvel Hero{% endblock %}
+{% block title %}Créer un Nouveau Super-Héros{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <div class="card shadow-lg">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-primary">
                 <div class="card-header bg-primary text-white text-center">
                     <h1 class="h4 mb-0">Créer mon Super-Héros</h1>
+                    <p class="lead">Entrez les informations pour votre nouveau héros</p>
                 </div>
                 <div class="card-body">
+                    <!-- Inclusion du formulaire pour créer un nouveau Super-Héros -->
                     {{ include('super_hero/_form.html.twig') }}
                 </div>
             </div>
             <div class="text-center mt-4">
-                <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
+                <!-- Retour à la liste des Super-Héros -->
+                <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left-circle"></i> Retour à la liste
                 </a>
             </div>

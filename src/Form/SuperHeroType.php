@@ -2,6 +2,7 @@
 namespace App\Form;
 
 use App\Entity\Team;
+use App\Entity\Power;
 use App\Entity\SuperHero;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -22,7 +23,11 @@ class SuperHeroType extends AbstractType
                 'label' => 'Alias',
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('power', null, [
+            ->add('power', EntityType::class, [ // Correction ici
+                'class' => Power::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Choisissez un pouvoir',
+                'required' => false,
                 'label' => 'Pouvoir',
                 'attr' => ['class' => 'form-control'],
             ])
@@ -37,9 +42,9 @@ class SuperHeroType extends AbstractType
             ])
             ->add('teams', EntityType::class, [
                 'class' => Team::class,
-                'choice_label' => 'name', // Affiche le nom des équipes
-                'multiple' => true,       // Permet de sélectionner plusieurs équipes
-                'expanded' => true,       // Affiche des cases à cocher
+                'choice_label' => 'name', 
+                'multiple' => true,       
+                'expanded' => true,       
                 'label' => 'Équipes',
                 'attr' => [
                     'class' => 'd-flex flex-wrap gap-2',

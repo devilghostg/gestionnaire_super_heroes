@@ -1,22 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}SuperHero{% endblock %}
+{% block title %}Détails du Super-Héros{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg shadow-lg">
-            <h1 class="display-4 text-warning font-weight-bold text-shadow">Super-Héros Détails</h1>
-            <p class="lead text-light">Explorez les détails du super-héros et apprenez-en davantage sur ses capacités et ses faiblesses !</p>
+            <h1 class="display-4 text-warning font-weight-bold text-shadow">Détails du Super-Héros</h1>
+            <p class="lead text-light">Explorez les détails de ce héros et découvrez ses pouvoirs et ses faiblesses !</p>
         </div>
 
         <!-- Contenu principal -->
         <div class="col-md-9">
-            <!-- Informations principales -->
+            <!-- Introduction -->
             <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
                 <div class="text-center">
-                    <p class="lead text-light font-italic">Voici les informations complètes de votre héros !</p>
+                    <p class="lead text-light font-italic">Voici les informations complètes de ce super-héros !</p>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@
                             </tr>
                             <tr>
                                 <th>Pouvoir</th>
-                                <td>{{ super_hero.power }}</td>
+                                <td>{{ super_hero.power.name }}</td>
                             </tr>
                             <tr>
                                 <th>Faiblesse</th>
@@ -75,7 +75,7 @@
 
                     <!-- Actions -->
                     <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
+                        <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left-circle"></i> Retour à la liste
                         </a>
                         <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-warning">

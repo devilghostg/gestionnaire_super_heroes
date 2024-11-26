@@ -16,12 +16,12 @@ class TeamType extends AbstractType
         $builder
             ->add('name')
             ->add('description')
-            ->add('superHeroes', EntityType::class, [
-                'class' => SuperHero::class,
-                'choice_label' => 'name',
-                'multiple' => true,  // Permet de sélectionner plusieurs héros
-                'expanded' => true,  // Affiche les héros sous forme de cases à cocher
-            ])
+            // ->add('superHeroes', EntityType::class, [
+            //     'class' => SuperHero::class,
+            //     'choice_label' => 'name',
+            //     'multiple' => true,  // Permet de sélectionner plusieurs héros
+            //     'expanded' => true,  // Affiche les héros sous forme de cases à cocher
+            // ])
         ;
     }
 

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un nouveau pouvoir{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h4 mb-0">Créer un nouveau pouvoir</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_row(form.name) }}
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-success" type="submit">Créer le pouvoir</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ path('power_index') }}" class="btn btn-secondary">
+                        Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

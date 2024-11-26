@@ -1,31 +1,54 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier le SuperHero{% endblock %}
+{% block title %}Modifier le Super-Héros{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
         <div class="row justify-content-center">
             <!-- Titre et description de la page -->
-            <div class="col-12 text-center">
-                <h1 class="display-4 text-primary">Modifier votre SuperHéros</h1>
-                <p class="lead text-light">Rafraîchissez votre super-pouvoir en modifiant les informations de votre héros !</p>
+            <div class="col-12 text-center mb-4">
+                <h1 class="display-4 text-primary">Modifier votre Super-Héros</h1>
+                <p class="lead text-light">Rafraîchissez les informations de votre héros et mettez à jour ses pouvoirs !</p>
             </div>
 
             <!-- Formulaire de modification -->
             <div class="col-md-8 col-lg-6">
                 <div class="card shadow-lg border-primary">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">Édition du SuperHéros</h3>
+                        <h3 class="card-title">Édition du Super-Héros</h3>
                     </div>
                     <div class="card-body">
                         <!-- Inclusion du formulaire avec un label de bouton adapté -->
                         {{ include('super_hero/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+                        <!-- Ajouter des pouvoirs au super-héros -->
+                        {% if all_powers is defined and all_powers is not empty %}
+                            <div class="mt-4">
+                                <h4 class="text-primary">Ajouter des pouvoirs</h4>
+                                <form method="POST" action="{{ path('super_hero_add_powers', {'id': super_hero.id}) }}">
+                                    <div class="mb-3">
+                                        <label for="powers" class="form-label">Choisir des pouvoirs</label>
+                                        <select name="powers[]" id="powers" class="form-control" multiple>
+                                            {% for power in all_powers %}
+                                                <option value="{{ power.id }}" 
+                                                    {% if super_hero.powers|map(p => p.id)|filter(v => v == power.id)|length > 0 %} selected {% endif %}>
+                                                    {{ power.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-info">Ajouter ces pouvoirs</button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <p class="text-danger">Aucun pouvoir disponible. Ajoutez des pouvoirs dans la base de données pour les associer à ce super-héros.</p>
+                        {% endif %}
                     </div>
 
                     <!-- Bouton retour à la liste -->
                     <div class="card-footer text-center">
                         <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-left-circle"></i> Retour à la liste
+                            <i class="bi bi-arrow-left-circle"></i> Retour à la liste des super-héros
                         </a>
                     </div>
                 </div>
@@ -37,6 +60,8 @@
             <div class="col-md-8 col-lg-6">
                 <div class="card border-danger">
                     <div class="card-body text-center">
+                        <h4 class="text-danger">Supprimer ce Super-Héros</h4>
+                        <p class="text-muted">Cette action est irréversible !</p>
                         {{ include('super_hero/_delete_form.html.twig') }}
                     </div>
                 </div>

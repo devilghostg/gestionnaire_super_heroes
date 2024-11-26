@@ -1,4 +1,5 @@
 <?php
+// src/Entity/Team.php
 
 namespace App\Entity;
 
@@ -24,7 +25,8 @@ class Team
     /**
      * @var Collection<int, SuperHero>
      */
-    #[ORM\ManyToMany(targetEntity: SuperHero::class, mappedBy: 'teams')]
+    // Ajoutez 'inversedBy' pour indiquer la propriété de l'entité SuperHero qui gère la relation inverse
+    #[ORM\ManyToMany(targetEntity: SuperHero::class, inversedBy: 'teams')]
     private Collection $superHeroes;
 
     public function __construct()
@@ -45,7 +47,6 @@ class Team
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -57,13 +58,9 @@ class Team
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, SuperHero>
-     */
     public function getSuperHeroes(): Collection
     {
         return $this->superHeroes;
@@ -75,16 +72,14 @@ class Team
             $this->superHeroes->add($superHero);
             $superHero->addTeam($this); // Maintenir la relation bidirectionnelle
         }
-
         return $this;
     }
 
     public function removeSuperHero(SuperHero $superHero): static
     {
         if ($this->superHeroes->removeElement($superHero)) {
-            $superHero->removeTeam($this); // Maintenir la relation bidirectionnelle
+            $superHero->removeTeam($this); // Retirer la relation bidirectionnelle
         }
-
         return $this;
     }
 }

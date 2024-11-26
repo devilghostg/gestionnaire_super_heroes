@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du pouvoir{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h4 mb-0">Détails du pouvoir</h1>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ power.name }}</h5>
+                        <div class="mb-3">
+                            <strong>Nom :</strong> {{ power.name }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Description :</strong> {{ power.description }}
+                        </div>
+                        
+                        <!-- Formulaire de suppression -->
+                        <form method="POST" action="{{ path('power_delete', {'id': power.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ power.id) }}">
+                            <button class="btn btn-danger" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce pouvoir ?')">Supprimer</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ path('power_index') }}" class="btn btn-secondary">Retour à la liste des pouvoirs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

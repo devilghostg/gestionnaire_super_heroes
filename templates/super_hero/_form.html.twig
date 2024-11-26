@@ -24,22 +24,35 @@
                         </div>
                     {# Gestion spécifique pour le champ teams (cases à cocher) #}
                     {% elseif field.vars.name == 'teams' %}
-                    <div class="row">
-                        {% for choice in field %}
-                            <div class="col-md-6 mb-2">
-                                <div class="form-check">
-                                    {{ form_widget(choice, {'attr': {'class': 'form-check-input', 'type': 'radio'}}) }}
-                                    {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        <div class="row">
+                            {% for choice in field %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        {{ form_widget(choice, {'attr': {'class': 'form-check-input', 'type': 'checkbox'}}) }}
+                                        {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
                                 </div>
-                            </div>
-                        {% endfor %}
-                        {{ form_errors(field) }}
-                    </div>
+                            {% endfor %}
+                            {{ form_errors(field) }}
+                        </div>
+                    {# Gestion spécifique pour le champ Power (sélection d'un pouvoir) #}
+                    {% elseif field.vars.name == 'power' %}
+                        <div class="mb-3">
+                            {{ form_label(field, 'Pouvoir', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-select'
+                                }
+                            }) }}
+                            {{ form_errors(field) }}
+                        </div>
                     {# Gestion générique pour les autres champs #}
                     {% else %}
-                        {{ form_label(field, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(field) }}
+                        <div class="mb-3">
+                            {{ form_label(field, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(field) }}
+                        </div>
                     {% endif %}
                 </div>
             {% endif %}

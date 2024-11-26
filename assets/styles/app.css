@@ -49,7 +49,7 @@ body {
     background-color: black;
     height: 100vh;
     margin: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: relative;
 }
 
