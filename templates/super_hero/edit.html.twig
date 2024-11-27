@@ -22,7 +22,7 @@
                         {{ include('super_hero/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 
                         <!-- Ajouter des pouvoirs au super-héros -->
-                        {% if all_powers is defined and all_powers is not empty %}
+                        {# {% if all_powers is defined and all_powers is not empty %}
                             <div class="mt-4">
                                 <h4 class="text-primary">Ajouter des pouvoirs</h4>
                                 <form method="POST" action="{{ path('super_hero_add_powers', {'id': super_hero.id}) }}">
@@ -42,7 +42,7 @@
                             </div>
                         {% else %}
                             <p class="text-danger">Aucun pouvoir disponible. Ajoutez des pouvoirs dans la base de données pour les associer à ce super-héros.</p>
-                        {% endif %}
+                        {% endif %} #}
                     </div>
 
                     <!-- Bouton retour à la liste -->

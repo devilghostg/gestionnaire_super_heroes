@@ -25,8 +25,8 @@ class Team
     /**
      * @var Collection<int, SuperHero>
      */
-    // Ajoutez 'inversedBy' pour indiquer la propriété de l'entité SuperHero qui gère la relation inverse
-    #[ORM\ManyToMany(targetEntity: SuperHero::class, inversedBy: 'teams')]
+    // Correction de la configuration de la relation ManyToMany dans l'entité Team
+    #[ORM\OneToMany(targetEntity: SuperHero::class, mappedBy: 'team')]
     private Collection $superHeroes;
 
     public function __construct()
@@ -70,7 +70,7 @@ class Team
     {
         if (!$this->superHeroes->contains($superHero)) {
             $this->superHeroes->add($superHero);
-            $superHero->addTeam($this); // Maintenir la relation bidirectionnelle
+            $superHero->setTeam($this); // Maintenir la relation bidirectionnelle
         }
         return $this;
     }
@@ -78,7 +78,7 @@ class Team
     public function removeSuperHero(SuperHero $superHero): static
     {
         if ($this->superHeroes->removeElement($superHero)) {
-            $superHero->removeTeam($this); // Retirer la relation bidirectionnelle
+            $superHero->setTeam(null); // Retirer la relation bidirectionnelle
         }
         return $this;
     }

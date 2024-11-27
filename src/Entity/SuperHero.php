@@ -33,12 +33,11 @@ class SuperHero
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $is_active = false;
 
-    #[ORM\ManyToMany(targetEntity: Team::class, mappedBy: 'superHeroes')]
-    private Collection $teams;
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'superHeroes')]
+    private ?Team $team = null;
 
     public function __construct()
     {
-        $this->teams = new ArrayCollection();
     }
 
     // Getter et Setter pour l'ID
@@ -113,30 +112,14 @@ class SuperHero
         return $this;
     }
 
-    /**
-     * @return Collection<int, Team>
-     */
-    public function getTeams(): Collection
+    public function getTeam(): ?Team
     {
-        return $this->teams;
+        return $this->team;
     }
 
-    // Méthode pour ajouter une équipe à un super-héros
-    public function addTeam(Team $team): static
+    public function setTeam(?Team $team): static
     {
-        if (!$this->teams->contains($team)) {
-            $this->teams->add($team);
-            $team->addSuperHero($this); // Assurez-vous que l'ajout est également effectué côté Team
-        }
-        return $this;
-    }
-
-    // Méthode pour retirer une équipe d'un super-héros
-    public function removeTeam(Team $team): static
-    {
-        if ($this->teams->removeElement($team)) {
-            $team->removeSuperHero($this); // Retirer la relation côté Team également
-        }
+        $this->team = $team;
         return $this;
     }
 }

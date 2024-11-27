@@ -57,14 +57,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>Équipes</th>
+                                <th>Équipe</th>
                                 <td>
-                                    {% if super_hero.teams|length > 0 %}
-                                        <ul class="list-unstyled">
-                                            {% for team in super_hero.teams %}
-                                                <li><i class="bi bi-shield-fill text-primary"></i> {{ team.name }}</li>
-                                            {% endfor %}
-                                        </ul>
+                                    {% if super_hero.team %}
+                                        <i class="bi bi-shield-fill text-primary"></i> {{ super_hero.team.name }}
                                     {% else %}
                                         <span class="text-muted">Aucune équipe assignée</span>
                                     {% endif %}

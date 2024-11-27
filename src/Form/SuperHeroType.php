@@ -23,7 +23,7 @@ class SuperHeroType extends AbstractType
                 'label' => 'Alias',
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('power', EntityType::class, [ // Correction ici
+            ->add('power', EntityType::class, [ 
                 'class' => Power::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Choisissez un pouvoir',
@@ -40,12 +40,13 @@ class SuperHeroType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-check-input'],
             ])
-            ->add('teams', EntityType::class, [
+            ->add('team', EntityType::class, [
                 'class' => Team::class,
-                'choice_label' => 'name', 
-                'multiple' => true,       
-                'expanded' => true,       
-                'label' => 'Équipes',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Équipe',
+                'required' => false,
                 'attr' => [
                     'class' => 'd-flex flex-wrap gap-2',
                 ],
