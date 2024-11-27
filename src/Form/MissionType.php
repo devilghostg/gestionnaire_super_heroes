@@ -39,22 +39,14 @@ class MissionType extends AbstractType
                     'Très difficile' => 5
                 ]
             ])
-            ->add('timeLimit', IntegerType::class, [
-                'label' => 'Limite de temps (en secondes)',
-                'attr' => [
-                    'min' => 60,
-                    'placeholder' => 'Ex: 3600 pour 1 heure'
-                ]
-            ])
             ->add('requiredPowers', EntityType::class, [
                 'class' => Power::class,
                 'choice_label' => 'name',
+                'label' => 'Pouvoirs requis',
                 'multiple' => true,
                 'expanded' => true,
-                'label' => 'Pouvoirs requis',
                 'required' => false
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

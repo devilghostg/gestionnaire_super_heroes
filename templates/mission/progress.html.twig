@@ -1,208 +1,212 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mission en cours : {{ mission.title }}{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .progress {
-            height: 25px;
-        }
-        .battle-log {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .hero-stats {
-            border-left: 3px solid #007bff;
-            padding-left: 15px;
-        }
-    </style>
-{% endblock %}
+{% block title %}Progression de la mission{% endblock %}
 
 {% block body %}
 <div class="container mt-4">
     <div class="card">
         <div class="card-header">
-            <h2 class="mb-0">{{ mission.title }}</h2>
+            <h1>{{ mission.title }}</h1>
         </div>
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-md-8">
-                    <h4>Progression de la mission</h4>
-                    <div class="progress mb-3">
+                    <div class="progress" style="height: 25px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" 
                              role="progressbar" 
-                             id="missionProgress"
-                             style="width: 0%">
-                            <span id="progressText">0%</span>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Temps écoulé: <span id="elapsedTime">00:00</span></span>
-                        <span>Temps limite: <span id="timeLimit">{{ mission.timeLimit }}s</span></span>
+                             style="width: 0%;" 
+                             aria-valuenow="0" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">0%</div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="hero-stats">
-                        <h5>{{ mission.superHero.name }}</h5>
-                        <p class="mb-1">Énergie: <span id="heroEnergy">100</span>%</p>
-                        <p class="mb-1">Efficacité: <span id="heroEfficiency">0</span>%</p>
+                    <div class="timer-display text-center mb-2">
+                        <h3 id="timer" class="mb-0">00:00</h3>
+                        <small class="text-muted">Temps écoulé</small>
                     </div>
                 </div>
             </div>
 
-            <div class="battle-log card">
-                <div class="card-header">
-                    <h5 class="mb-0">Journal de mission</h5>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mission-status">
+                        <h4>Journal de Mission</h4>
+                        <div id="missionLog" class="mission-log p-3 bg-light rounded">
+                            <div class="log-entry">
+                                <p class="text-info">[Info] Début de la mission...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="battleLog" class="battle-log">
-                        <p class="text-muted">La mission commence...</p>
+                <div class="col-md-4">
+                    <div class="hero-status card">
+                        <div class="card-body">
+                            <h5 class="card-title">État du Héros</h5>
+                            <p class="card-text">
+                                <strong>Héros :</strong> {{ mission.superHero.name }}<br>
+                                <strong>Énergie :</strong> 
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ mission.superHero.energy }}%;" 
+                                         aria-valuenow="{{ mission.superHero.energy }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ mission.superHero.energy }}%
+                                    </div>
+                                </div>
+                            </p>
+                            <form method="post" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" class="d-inline" id="cancelForm">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
+                                <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?')">
+                                    <i class="bi bi-x-circle"></i> Annuler la mission
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card-footer">
-            <form id="cancelMissionForm" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" method="post" class="d-inline">
-                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
-                <button type="submit" class="btn btn-danger" id="cancelButton">
-                    <i class="bi bi-x-circle"></i> Annuler la mission
-                </button>
-            </form>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block javascripts %}
-{{ parent() }}
+<style>
+    .mission-log {
+        height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        background-color: #1a1a1a !important;
+        color: #fff;
+    }
+    .log-entry {
+        margin-bottom: 0.5rem;
+    }
+    .log-entry p {
+        margin-bottom: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.9rem;
+    }
+    .timer-display {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .timer-display h3 {
+        font-family: monospace;
+        font-size: 2rem;
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const missionData = {
-        timeLimit: {{ mission.timeLimit }},
-        difficulty: {{ mission.difficulty }},
-        heroId: {{ mission.superHero.id }},
-        missionId: {{ mission.id }}
-    };
-
-    let startTime = Date.now();
-    let progressInterval;
-    let battleEvents = [];
-    let currentEnergy = 100;
-    let currentEfficiency = 0;
+    let progress = 0;
+    const progressBar = document.querySelector('.progress-bar');
+    const missionId = {{ mission.id }};
+    const startTime = new Date().getTime();
+    const timeLimit = {{ mission.timeLimit }};
+    
+    function updateTimer() {
+        const currentTime = new Date().getTime();
+        const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    function addLogMessage(message, type = 'info') {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        const timestamp = new Date().toLocaleTimeString();
+        let colorClass = 'text-info';
+        
+        switch(type) {
+            case 'success':
+                colorClass = 'text-success';
+                break;
+            case 'error':
+                colorClass = 'text-danger';
+                break;
+            case 'warning':
+                colorClass = 'text-warning';
+                break;
+        }
+        
+        logEntry.innerHTML = `<p class="${colorClass}">[${timestamp}] ${message}</p>`;
+        const missionLog = document.getElementById('missionLog');
+        missionLog.appendChild(logEntry);
+        missionLog.scrollTop = missionLog.scrollHeight;
+    }
     
     function updateProgress() {
-        const currentTime = Date.now();
-        const elapsedMilliseconds = currentTime - startTime;
-        const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+        progress += Math.random() * 5;
+        if (progress > 100) progress = 100;
         
-        // Arrondir au multiple de 60 inférieur
-        const adjustedSeconds = Math.floor(elapsedSeconds / 60) * 60;
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressBar.textContent = Math.round(progress) + '%';
         
-        // Calculer le pourcentage de progression
-        const progressPercentage = Math.min((adjustedSeconds / missionData.timeLimit) * 100, 100);
-        
-        // Mettre à jour la barre de progression
-        const progressBar = document.getElementById('missionProgress');
-        progressBar.style.width = progressPercentage + '%';
-        progressBar.setAttribute('aria-valuenow', progressPercentage);
-        document.getElementById('progressText').textContent = Math.round(progressPercentage) + '%';
-        
-        // Mettre à jour les temps
-        document.getElementById('elapsedTime').textContent = formatTime(adjustedSeconds);
-        
-        // Générer des événements aléatoires (10% de chance par seconde)
-        if (Math.random() < 0.1) {
-            generateBattleEvent();
+        // Générer des événements aléatoires
+        if (Math.random() < 0.3) {
+            const events = [
+                { message: "Le héros combat un ennemi !", type: 'warning' },
+                { message: "Une victime a été sauvée !", type: 'success' },
+                { message: "Progression de la mission...", type: 'info' },
+                { message: "Le héros utilise ses super-pouvoirs !", type: 'success' },
+                { message: "Situation critique détectée !", type: 'error' },
+                { message: "Zone sécurisée avec succès", type: 'success' }
+            ];
+            const event = events[Math.floor(Math.random() * events.length)];
+            addLogMessage(event.message, event.type);
         }
-
-        // Vérifier si la mission est terminée
-        if (adjustedSeconds >= missionData.timeLimit) {
-            clearInterval(progressInterval);
-            completeMission();
-        }
-    }
-
-    function formatTime(totalSeconds) {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    function generateBattleEvent() {
-        const events = [
-            "Le héros affronte un groupe d'ennemis !",
-            "Une situation critique nécessite une intervention rapide !",
-            "Le héros utilise ses pouvoirs spéciaux !",
-            "Un civil a besoin d'aide !",
-            "Le héros déjoue un piège !"
-        ];
-
-        const event = events[Math.floor(Math.random() * events.length)];
-        const success = Math.random() > 0.3;
-        const efficiency = Math.floor(Math.random() * 20) + 80;
-
-        const logEntry = document.createElement('p');
-        logEntry.className = success ? 'text-success' : 'text-danger';
-        logEntry.textContent = `${formatTime(Math.floor((Date.now() - startTime) / 1000))} - ${event} ${success ? '✓' : '✗'}`;
-
-        const battleLog = document.getElementById('battleLog');
-        battleLog.appendChild(logEntry);
-        battleLog.scrollTop = battleLog.scrollHeight;
-
-        // Mettre à jour les statistiques du héros
-        updateHeroStats(success, efficiency);
         
-        battleEvents.push({
-            event,
-            success,
-            efficiency,
-            timestamp: Date.now() - startTime
-        });
-    }
-
-    function updateHeroStats(success, efficiency) {
-        // Réduire l'énergie en fonction du succès
-        currentEnergy = Math.max(0, currentEnergy - (success ? 5 : 10));
-        document.getElementById('heroEnergy').textContent = currentEnergy;
-        
-        // Mettre à jour l'efficacité (moyenne mobile)
-        currentEfficiency = Math.round((currentEfficiency + efficiency) / 2);
-        document.getElementById('heroEfficiency').textContent = currentEfficiency;
-    }
-
-    function completeMission() {
-        // Désactiver le bouton d'annulation
-        document.getElementById('cancelButton').disabled = true;
-        
-        // Envoyer les résultats au serveur
-        fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
+        // Envoyer la progression au serveur
+        fetch(`/mission/${missionId}/update-progress`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token('complete' ~ mission.id) }}'
             },
-            body: JSON.stringify({
-                efficiency: currentEfficiency,
-                energy: currentEnergy,
-                events: battleEvents
-            })
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = '{{ path('app_mission_show', {'id': mission.id}) }}';
-            }
+            body: JSON.stringify({ progress: Math.round(progress) })
         });
-    }
-
-    // Démarrer le suivi de la progression
-    progressInterval = setInterval(updateProgress, 1000);
-
-    // Gérer l'annulation de la mission
-    document.getElementById('cancelMissionForm').addEventListener('submit', function(e) {
-        if (!confirm('Êtes-vous sûr de vouloir annuler cette mission ?')) {
-            e.preventDefault();
+        
+        if (progress < 100) {
+            setTimeout(updateProgress, 1000);
+            updateTimer();
+        } else {
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.remove('progress-bar-striped');
+            progressBar.classList.add('bg-success');
+            
+            // Créer une bannière de succès
+            const successBanner = document.createElement('div');
+            successBanner.className = 'alert alert-success text-center mt-3';
+            successBanner.innerHTML = '<h4 class="mb-0"><i class="bi bi-check-circle"></i> Mission Terminée !</h4>';
+            document.querySelector('.progress').parentNode.appendChild(successBanner);
+            
+            addLogMessage("Mission terminée avec succès !", 'success');
+            addLogMessage("Redirection vers les détails de la mission...", 'info');
+            
+            // Rediriger vers la page de détails
+            fetch(`/mission/${missionId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token('complete' ~ mission.id) }}'
+                }
+            })
+            .then(() => {
+                setTimeout(() => {
+                    window.location.href = `/mission/${missionId}`;
+                }, 2000);
+            });
         }
-    });
+    }
+    
+    // Démarrer la mise à jour
+    updateProgress();
+    // Mettre à jour le timer chaque seconde
+    setInterval(updateTimer, 1000);
 });
 </script>
 {% endblock %}

@@ -1,129 +1,142 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mission: {{ mission.title }}{% endblock %}
+{% block title %}Détails de la mission{% endblock %}
 
 {% block body %}
     <div class="container mt-4">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h1 class="mb-0">{{ mission.title }}</h1>
-                <div>
-                    {% for i in 1..mission.difficulty %}
-                        <i class="bi bi-star-fill text-warning"></i>
-                    {% endfor %}
-                </div>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h5>Description</h5>
-                        <p class="card-text">{{ mission.description }}</p>
-
-                        <h5>Pouvoirs requis</h5>
-                        <ul class="list-unstyled">
-                            {% for power in mission.requiredPowers %}
-                                <li><i class="bi bi-lightning-charge-fill text-warning"></i> {{ power.name }}</li>
-                            {% else %}
-                                <li class="text-muted">Aucun pouvoir spécifique requis</li>
-                            {% endfor %}
-                        </ul>
-
-                        <h5>Limite de temps</h5>
-                        <p>{{ mission.timeLimit }} secondes</p>
-
-                        {% if mission.status == 'completed' %}
-                            <div class="alert alert-success">
-                                <h5>Mission accomplie !</h5>
-                                <p>{{ mission.result }}</p>
-                                <hr>
-                                <div class="row">
-                                    <div class="col">
-                                        <strong>Score :</strong> {{ mission.score }}
-                                    </div>
-                                    <div class="col">
-                                        <strong>Temps pris :</strong> 
-                                        {{ mission.completedAt.diff(mission.startedAt).format('%H:%I:%S') }}
-                                    </div>
-                                </div>
-                            </div>
+                {% if mission.status == 'completed' %}
+                    <div class="alert alert-success mb-4">
+                        <h4 class="alert-heading mb-0">
+                            <i class="bi bi-check-circle"></i> Mission Terminée
+                        </h4>
+                        {% if mission.score is not null %}
+                            <p class="mb-0 mt-2">Score final : {{ mission.score }}/100</p>
                         {% endif %}
                     </div>
+                {% endif %}
 
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Statut</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if mission.status == 'pending' %}
-                                    <span class="badge bg-info">En attente</span>
-                                {% elseif mission.status == 'in_progress' %}
-                                    <span class="badge bg-warning">En cours</span>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Informations générales</h4>
+                        <p><strong>Description:</strong> {{ mission.description }}</p>
+                        <p>
+                            <strong>Difficulté:</strong>
+                            {% for i in 1..5 %}
+                                {% if i <= mission.difficulty %}
+                                    <i class="bi bi-star-fill text-warning"></i>
                                 {% else %}
-                                    <span class="badge bg-success">Terminée</span>
+                                    <i class="bi bi-star text-warning"></i>
                                 {% endif %}
-
-                                {% if mission.superHero %}
-                                    <h6 class="mt-3">Héros assigné</h6>
-                                    <p>{{ mission.superHero.name }}</p>
-                                    
-                                    {% if mission.status == 'pending' %}
-                                        <form action="{{ path('app_mission_progress', {'id': mission.id}) }}" method="get" class="mt-3">
-                                            <button type="submit" class="btn btn-success w-100">
-                                                <i class="bi bi-play-fill"></i> Commencer la mission
-                                            </button>
-                                        </form>
-                                    {% endif %}
-                                {% endif %}
-
-                                {% if mission.status == 'pending' and not mission.superHero %}
-                                    <h6 class="mt-3">Assigner un héros</h6>
-                                    <form method="post" id="assignForm">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('assign' ~ mission.id) }}">
-                                        <select class="form-select mb-2" id="heroSelect" name="heroId">
-                                            <option value="">Choisir un héros</option>
-                                            {% for hero in available_heroes %}
-                                                <option value="{{ hero.id }}">{{ hero.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <button type="submit" class="btn btn-primary" id="assignButton" disabled>
-                                            Assigner
-                                        </button>
-                                    </form>
-                                {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p>
+                            <strong>Statut:</strong>
+                            {% if mission.status == 'completed' %}
+                                <span class="badge bg-success">Terminée</span>
+                            {% elseif mission.status == 'cancelled' %}
+                                <span class="badge bg-danger">Annulée</span>
+                            {% elseif mission.status == 'in_progress' %}
+                                <span class="badge bg-warning">En cours</span>
+                            {% else %}
+                                <span class="badge bg-secondary">En attente</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Héros assigné</h4>
+                        {% if mission.superHero %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ mission.superHero.name }}</h5>
+                                    <p class="card-text">
+                                        <strong>Identité:</strong> {{ mission.superHero.alias }}<br>
+                                        <strong>Pouvoir:</strong> {{ mission.superHero.power ? mission.superHero.power.name : 'Aucun' }}<br>
+                                        <strong>Énergie:</strong>
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar {% if mission.superHero.energy < 30 %}bg-danger{% else %}bg-success{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ mission.superHero.energy }}%">
+                                                {{ mission.superHero.energy }}%
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        {% else %}
+                            <p class="text-muted">Aucun héros assigné</p>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
-            <div class="card-footer">
-                <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Retour à la liste
-                </a>
+
+                {% if mission.result %}
+                    <div class="mt-4">
+                        <h4>Journal de mission</h4>
+                        <div class="mission-log p-3 bg-dark rounded">
+                            {% set logs = mission.result|split('\n') %}
+                            {% for log in logs %}
+                                <div class="log-entry">
+                                    {% if 'succès' in log|lower %}
+                                        <p class="text-success mb-1">{{ log }}</p>
+                                    {% elseif 'échec' in log|lower or 'erreur' in log|lower %}
+                                        <p class="text-danger mb-1">{{ log }}</p>
+                                    {% elseif 'attention' in log|lower or 'avertissement' in log|lower %}
+                                        <p class="text-warning mb-1">{{ log }}</p>
+                                    {% elseif 'info' in log|lower %}
+                                        <p class="text-info mb-1">{{ log }}</p>
+                                    {% else %}
+                                        <p class="text-light mb-1">{{ log }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
+
+                    {% if mission.status == 'pending' %}
+                        {% if not mission.superHero %}
+                            <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Assigner un héros
+                            </a>
+                        {% else %}
+                            <form method="post" action="{{ path('app_mission_start', {'id': mission.id}) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('start' ~ mission.id) }}">
+                                <button class="btn btn-success">
+                                    <i class="bi bi-play-fill"></i> Démarrer
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if mission.status == 'in_progress' %}
+                        <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn btn-warning">
+                            <i class="bi bi-play-fill"></i> Continuer
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block javascripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const heroSelect = document.getElementById('heroSelect');
-    const assignButton = document.getElementById('assignButton');
-    const assignForm = document.getElementById('assignForm');
-
-    if (heroSelect && assignButton && assignForm) {
-        // Met à jour l'action du formulaire et active/désactive le bouton
-        heroSelect.addEventListener('change', function() {
-            const heroId = this.value;
-            if (heroId) {
-                assignForm.action = "{{ path('app_mission_assign', {'id': mission.id, 'heroId': '__hero_id__'}) }}".replace('__hero_id__', heroId);
-                assignButton.disabled = false;
-            } else {
-                assignButton.disabled = true;
-            }
-        });
-    }
-});
-</script>
+    <style>
+        .mission-log {
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .log-entry p {
+            font-size: 0.9rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+        }
+    </style>
 {% endblock %}

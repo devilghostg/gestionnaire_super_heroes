@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assigner un héros{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="mb-0">Assigner un héros à la mission : {{ mission.title }}</h1>
+            </div>
+            <div class="card-body">
+                {% if heroes|length > 0 %}
+                    <div class="row">
+                        {% for hero in heroes %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ hero.name }}</h5>
+                                        <p class="card-text">
+                                            <strong>Énergie :</strong> {{ hero.energy }}%<br>
+                                            <strong>Pouvoir :</strong> {{ hero.power ? hero.power.name : 'Aucun' }}
+                                        </p>
+                                        <form method="post" action="{{ path('app_mission_assign_hero_post', {'id': mission.id, 'heroId': hero.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('assign' ~ mission.id ~ hero.id) }}">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-person-check"></i> Sélectionner
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        Aucun héros n'est disponible pour le moment.
+                    </div>
+                {% endif %}
+
+                <div class="mt-3">
+                    <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

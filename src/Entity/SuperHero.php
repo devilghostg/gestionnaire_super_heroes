@@ -33,15 +33,22 @@ class SuperHero
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $is_active = false;
 
+    #[ORM\Column]
+    private ?int $energy = 100;
+
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'superHeroes')]
     private ?Team $team = null;
 
     #[ORM\OneToMany(mappedBy: 'superHero', targetEntity: Mission::class)]
     private Collection $missions;
 
+    #[ORM\ManyToMany(targetEntity: Power::class)]
+    private Collection $powers;
+
     public function __construct()
     {
         $this->missions = new ArrayCollection();
+        $this->powers = new ArrayCollection();
     }
 
     // Getter et Setter pour l'ID
@@ -116,6 +123,17 @@ class SuperHero
         return $this;
     }
 
+    public function getEnergy(): ?int
+    {
+        return $this->energy;
+    }
+
+    public function setEnergy(int $energy): self
+    {
+        $this->energy = $energy;
+        return $this;
+    }
+
     public function getTeam(): ?Team
     {
         return $this->team;
@@ -153,6 +171,29 @@ class SuperHero
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Power>
+     */
+    public function getPowers(): Collection
+    {
+        return $this->powers;
+    }
+
+    public function addPower(Power $power): self
+    {
+        if (!$this->powers->contains($power)) {
+            $this->powers->add($power);
+        }
+
+        return $this;
+    }
+
+    public function removePower(Power $power): self
+    {
+        $this->powers->removeElement($power);
         return $this;
     }
 }

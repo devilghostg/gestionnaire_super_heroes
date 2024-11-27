@@ -51,4 +51,18 @@ class MissionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Trouve toutes les missions annulées qui doivent être supprimées
+     */
+    public function findMissionsToDelete(): array
+    {
+        $now = new \DateTimeImmutable();
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.status = :status')
+            ->andWhere('m.cancelledAt IS NOT NULL')
+            ->setParameter('status', 'cancelled');
+
+        return $qb->getQuery()->getResult();
+    }
 }

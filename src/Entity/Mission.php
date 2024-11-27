@@ -25,7 +25,7 @@ class Mission
     #[ORM\Column]
     private ?int $difficulty = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $startedAt = null;
 
     #[ORM\Column(nullable: true)]
@@ -37,7 +37,7 @@ class Mission
     #[ORM\Column]
     private ?int $timeLimit = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(type: 'string', length: 20)]
     private ?string $status = 'pending';
 
     #[ORM\ManyToOne(inversedBy: 'missions')]
@@ -56,6 +56,8 @@ class Mission
     public function __construct()
     {
         $this->requiredPowers = new ArrayCollection();
+        $this->status = 'pending';
+        $this->timeLimit = 120; // 2 minutes par défaut
     }
 
     public function getId(): ?int
@@ -101,7 +103,7 @@ class Mission
         return $this->startedAt;
     }
 
-    public function setStartedAt(\DateTimeImmutable $startedAt): static
+    public function setStartedAt(?\DateTimeImmutable $startedAt): static
     {
         $this->startedAt = $startedAt;
         return $this;
@@ -145,7 +147,7 @@ class Mission
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(string $status): self
     {
         $this->status = $status;
         return $this;
