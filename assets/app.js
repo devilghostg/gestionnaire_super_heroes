@@ -1,13 +1,18 @@
-import './bootstrap.js';
 /*
  * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
  */
-import './styles/app.css';
 
-console.log('App.js is loaded!');
+// Import Bootstrap
+import 'bootstrap';
+
+// Import our custom CSS
+import './styles/space-theme.css';
+
+// Import our custom JS
+import './js/space-theme.js';
+
+// Start the app
+console.log('Welcome to Super Heroes HQ!');
 
 // Fonction pour gérer la progression de la mission
 function initializeMissionProgress() {

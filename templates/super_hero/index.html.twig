@@ -43,19 +43,25 @@
                                                     {{ super_hero.power.name }}<br>
                                                     <strong>Description : </strong>{{ super_hero.power.description }}
                                                 {% else %}
-                                                    Aucun pouvoir
+                                                    <span class="text-muted">-</span>
                                                 {% endif %}
                                             </span><br>
                                             
                                             <strong>Faiblesse :</strong> 
-                                            <span class="text-danger">{{ super_hero.weakness }}</span><br>
+                                            <span class="text-danger">
+                                                {% if super_hero.weakness %}
+                                                    {{ super_hero.weakness }}
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </span><br>
                                             
                                             <strong>Équipe :</strong> 
                                             <span class="text-info">
                                                 {% if super_hero.team %}
                                                     {{ super_hero.team.name }}
                                                 {% else %}
-                                                    Aucune équipe
+                                                    <span class="text-muted">-</span>
                                                 {% endif %}
                                             </span><br>
                                             

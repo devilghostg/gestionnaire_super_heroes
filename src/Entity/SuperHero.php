@@ -45,6 +45,9 @@ class SuperHero
     #[ORM\ManyToMany(targetEntity: Power::class)]
     private Collection $powers;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $model3dPath = null;
+
     public function __construct()
     {
         $this->missions = new ArrayCollection();
@@ -194,6 +197,17 @@ class SuperHero
     public function removePower(Power $power): self
     {
         $this->powers->removeElement($power);
+        return $this;
+    }
+
+    public function getModel3dPath(): ?string
+    {
+        return $this->model3dPath;
+    }
+
+    public function setModel3dPath(?string $model3dPath): self
+    {
+        $this->model3dPath = $model3dPath;
         return $this;
     }
 }

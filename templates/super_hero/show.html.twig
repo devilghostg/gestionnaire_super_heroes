@@ -1,94 +1,128 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails du Super-Héros{% endblock %}
+{% block title %}Détails du Super-héros{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #hero3dContainer {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="{{ asset('js/hero3d.js') }}"></script>
+{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg shadow-lg">
-            <h1 class="display-4 text-warning font-weight-bold text-shadow">Détails du Super-Héros</h1>
-            <p class="lead text-light">Explorez les détails de ce héros et découvrez ses pouvoirs et ses faiblesses !</p>
-        </div>
-
-        <!-- Contenu principal -->
-        <div class="col-md-9">
-            <!-- Introduction -->
-            <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
-                <div class="text-center">
-                    <p class="lead text-light font-italic">Voici les informations complètes de ce super-héros !</p>
-                </div>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h1>{{ super_hero.name }}</h1>
             </div>
+            <div class="card-body">
+                {# Conteneur 3D #}
+                <div id="hero3dContainer"></div>
 
-            <!-- Détails du super-héros -->
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-body">
-                    <h5 class="card-title text-primary text-center">Détails de : {{ super_hero.name }}</h5>
-                    <table class="table table-striped">
-                        <tbody>
-                            <tr>
-                                <th>Id</th>
-                                <td>{{ super_hero.id }}</td>
-                            </tr>
-                            <tr>
-                                <th>Nom</th>
-                                <td>{{ super_hero.name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Alias</th>
-                                <td>{{ super_hero.alias }}</td>
-                            </tr>
-                            <tr>
-                                <th>Pouvoir</th>
-                                <td>{{ super_hero.power.name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Faiblesse</th>
-                                <td>{{ super_hero.weakness }}</td>
-                            </tr>
-                            <tr>
-                                <th>Statut</th>
-                                <td>
-                                    {% if super_hero.isActive %}
-                                        <span class="badge bg-success">Actif</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">Inactif</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Équipe</th>
-                                <td>
-                                    {% if super_hero.team %}
-                                        <i class="bi bi-shield-fill text-primary"></i> {{ super_hero.team.name }}
-                                    {% else %}
-                                        <span class="text-muted">Aucune équipe assignée</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Id</th>
+                            <td>{{ super_hero.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nom</th>
+                            <td>{{ super_hero.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Alias</th>
+                            <td>{{ super_hero.alias }}</td>
+                        </tr>
+                        <tr>
+                            <th>Pouvoir</th>
+                            <td>
+                                {% if super_hero.power %}
+                                    {{ super_hero.power.name }}
+                                {% else %}
+                                    <span class="text-muted">Aucun pouvoir assigné</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Faiblesse</th>
+                            <td>{{ super_hero.weakness }}</td>
+                        </tr>
+                        <tr>
+                            <th>Statut</th>
+                            <td>
+                                {% if super_hero.isActive %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Énergie</th>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if super_hero.energy < 30 %}bg-danger{% elseif super_hero.energy < 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ super_hero.energy }}%;" 
+                                         aria-valuenow="{{ super_hero.energy }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ super_hero.energy }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Équipe</th>
+                            <td>
+                                {% if super_hero.team %}
+                                    <a href="{{ path('app_team_show', {'id': super_hero.team.id}) }}">
+                                        {{ super_hero.team.name }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Aucune équipe assignée</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                    <!-- Actions -->
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left-circle"></i> Retour à la liste
-                        </a>
-                        <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-warning">
-                            <i class="bi bi-pencil"></i> Modifier
-                        </a>
-                    </div>
-                </div>
-            </div>
+                <div class="mt-4">
+                    <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
 
-            <!-- Formulaire de suppression -->
-            <div class="card mt-4 border-0 shadow-lg">
-                <div class="card-body text-center">
-                    <p class="text-danger font-weight-bold">Attention : Cette action est irréversible.</p>
+                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+
                     {{ include('super_hero/_delete_form.html.twig') }}
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewer = new Hero3DViewer('hero3dContainer');
+            
+            {% if super_hero.model3dPath %}
+                viewer.loadModel('{{ super_hero.model3dPath }}');
+            {% endif %}
+        });
+    </script>
 {% endblock %}

@@ -9,6 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class SuperHeroType extends AbstractType
 {
@@ -39,6 +40,18 @@ class SuperHeroType extends AbstractType
                 'label' => 'Est Actif',
                 'required' => false,
                 'attr' => ['class' => 'form-check-input'],
+            ])
+            ->add('model3dPath', ChoiceType::class, [
+                'label' => 'Modèle 3D',
+                'required' => false,
+                'choices' => [
+                    'Robot Hero' => '/models/heroes/robot_hero.glb',
+                    'Super Hero' => '/models/heroes/superhero.glb',
+                    'Iron Suit' => '/models/heroes/iron_suit.glb',
+                    'Captain Shield' => '/models/heroes/captain_shield.glb',
+                    'Spider Hero' => '/models/heroes/spider_hero.glb',
+                ],
+                'placeholder' => 'Choisir un modèle 3D',
             ])
             ->add('team', EntityType::class, [
                 'class' => Team::class,
