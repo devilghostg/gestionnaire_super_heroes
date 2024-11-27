@@ -1,151 +1,127 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de la mission{% endblock %}
+{% block title %}{{ mission.title }} - Mission Details{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h1 class="mb-0">{{ mission.title }}</h1>
-            </div>
-            <div class="card-body">
-                {% if mission.status == 'completed' %}
-                    <div class="alert alert-success mb-4">
-                        <h4 class="alert-heading mb-0">
-                            <i class="bi bi-check-circle"></i> Mission Terminée
-                        </h4>
-                        {% if mission.score is not null %}
-                            <p class="mb-0 mt-2">Score final : {{ mission.score }}/100</p>
-                        {% endif %}
-                    </div>
-                {% endif %}
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Missions
+            </a>
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ mission.title }}
+            </h1>
+        </div>
+        <span class="badge {% if mission.status == 'completed' %}badge-success{% elseif mission.status == 'in_progress' %}badge-warning{% else %}badge-secondary{% endif %}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+            {{ mission.status|title|replace({'_': ' '}) }}
+        </span>
+    </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <h4>Informations générales</h4>
-                        <p><strong>Description:</strong> {{ mission.description }}</p>
-                        <p>
-                            <strong>Difficulté:</strong>
-                            {% for i in 1..5 %}
-                                {% if i <= mission.difficulty %}
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                {% else %}
-                                    <i class="bi bi-star text-warning"></i>
-                                {% endif %}
-                            {% endfor %}
-                        </p>
-                        <p>
-                            <strong>Statut:</strong>
-                            {% if mission.status == 'completed' %}
-                                <span class="badge bg-success">Terminée</span>
-                            {% elseif mission.status == 'cancelled' %}
-                                <span class="badge bg-danger">Annulée</span>
-                            {% elseif mission.status == 'in_progress' %}
-                                <span class="badge bg-warning">En cours</span>
-                            {% else %}
-                                <span class="badge bg-secondary">En attente</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Héros assigné</h4>
-                        {% if mission.superHero %}
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ mission.superHero.name }}</h5>
-                                    <p class="card-text">
-                                        <strong>Identité:</strong> {{ mission.superHero.alias }}<br>
-                                        <strong>Pouvoir:</strong> {{ mission.superHero.power ? mission.superHero.power.name : 'Aucun' }}<br>
-                                        <strong>Énergie:</strong>
-                                        <div class="progress mt-1">
-                                            <div class="progress-bar {% if mission.superHero.energy < 30 %}bg-danger{% else %}bg-success{% endif %}" 
-                                                 role="progressbar" 
-                                                 style="width: {{ mission.superHero.energy }}%">
-                                                {{ mission.superHero.energy }}%
-                                            </div>
-                                        </div>
-                                    </p>
-                                </div>
+    <div class="card">
+        <div class="card-body" style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; padding: 2rem;">
+            <div>
+                <section style="background: rgba(255, 255, 255, 0.5); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1.5rem; color: var(--accent-color);">Mission Details</h3>
+                    
+                    {% if mission.description %}
+                        <p style="color: #666; margin-bottom: 1.5rem; line-height: 1.6;">{{ mission.description }}</p>
+                    {% endif %}
+
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--border-radius);">
+                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent-color);">Difficulty Level</strong>
+                            <div>
+                                {% for i in 1..5 %}
+                                    <i class="fas fa-star" style="color: {{ i <= mission.difficulty ? '#FFD700' : '#ddd' }}; font-size: 1.2rem; margin: 0 0.2rem;"></i>
+                                {% endfor %}
                             </div>
-                        {% else %}
-                            <p class="text-muted">Aucun héros assigné</p>
-                        {% endif %}
-                    </div>
-                </div>
+                        </div>
 
-                {% if mission.result %}
-                    <div class="mt-4">
-                        <h4>Journal de mission</h4>
-                        <div class="mission-log p-3 bg-dark rounded">
-                            {% set logs = mission.result|split('\n') %}
-                            {% for log in logs %}
-                                <div class="log-entry">
-                                    {% if 'succès' in log|lower %}
-                                        <p class="text-success mb-1">{{ log }}</p>
-                                    {% elseif 'échec' in log|lower or 'erreur' in log|lower %}
-                                        <p class="text-danger mb-1">{{ log }}</p>
-                                    {% elseif 'attention' in log|lower or 'avertissement' in log|lower %}
-                                        <p class="text-warning mb-1">{{ log }}</p>
-                                    {% elseif 'info' in log|lower %}
-                                        <p class="text-info mb-1">{{ log }}</p>
-                                    {% else %}
-                                        <p class="text-light mb-1">{{ log }}</p>
-                                    {% endif %}
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            {% if mission.startedAt %}
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--border-radius);">
+                                    <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent-color);">Start Date</strong>
+                                    <span style="color: #666;">{{ mission.startedAt|date('Y-m-d H:i') }}</span>
                                 </div>
-                            {% endfor %}
+                            {% endif %}
+
+                            {% if mission.completedAt %}
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--border-radius);">
+                                    <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent-color);">End Date</strong>
+                                    <span style="color: #666;">{{ mission.completedAt|date('Y-m-d H:i') }}</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                {% endif %}
+                </section>
 
-                <div class="mt-4">
-                    <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Retour à la liste
-                    </a>
+                <section style="background: rgba(255, 255, 255, 0.5); border-radius: var(--border-radius); padding: 2rem;">
+                    <h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1.5rem; color: var(--accent-color);">Assigned Hero</h3>
+                    {% if mission.superHero %}
+                        <div style="background: rgba(255, 255, 255, 0.7); border-radius: var(--border-radius); padding: 2rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 1.3rem; margin: 0; color: var(--accent-color);">{{ mission.superHero.name }}</h4>
+                                <span class="badge {% if mission.superHero.isActive %}badge-success{% else %}badge-secondary{% endif %}">
+                                    {{ mission.superHero.isActive ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
 
-                    {% if mission.status == 'pending' %}
-                        {% if not mission.superHero %}
-                            <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
-                                <i class="bi bi-person-plus"></i> Assigner un héros
+                            {% if mission.superHero.power %}
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--border-radius); margin-bottom: 1.5rem;">
+                                    <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent-color);">Power</strong>
+                                    <span style="color: #666; font-size: 1.1rem;">{{ mission.superHero.power.name }}</span>
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent-color); text-align: center;">Energy Level</strong>
+                                <div class="progress" style="height: 12px; background: rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; margin-top: 0.5rem;">
+                                    <div style="width: {{ mission.superHero.energy }}%; height: 100%; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));"></div>
+                                </div>
+                                <div style="text-align: center; margin-top: 0.5rem; color: #666;">{{ mission.superHero.energy }}%</div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem;">
+                            <p style="color: #666; margin-bottom: 1.5rem;">No hero assigned to this mission yet.</p>
+                            <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn">
+                                <i class="fas fa-user-plus"></i> Assign Hero
                             </a>
-                        {% else %}
-                            <form method="post" action="{{ path('app_mission_start', {'id': mission.id}) }}" class="d-inline">
+                        </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.5); border-radius: var(--border-radius); padding: 2rem;">
+                <h3 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1.5rem; color: var(--accent-color); text-align: center;">Actions</h3>
+                <div class="btn-group" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit Mission
+                    </a>
+                    
+                    {% if mission.status != 'completed' %}
+                        <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn" style="background: #FF9800;">
+                            <i class="fas fa-tasks"></i> Update Progress
+                        </a>
+
+                        {% if mission.status == 'pending' and mission.superHero %}
+                            <form method="post" action="{{ path('app_mission_start', {'id': mission.id}) }}" style="width: 100%;">
                                 <input type="hidden" name="_token" value="{{ csrf_token('start' ~ mission.id) }}">
-                                <button class="btn btn-success">
-                                    <i class="bi bi-play-fill"></i> Démarrer
+                                <button class="btn" style="width: 100%; background: #4CAF50;">
+                                    <i class="fas fa-play"></i> Start Mission
                                 </button>
                             </form>
                         {% endif %}
                     {% endif %}
 
-                    {% if mission.status == 'in_progress' %}
-                        <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn btn-warning">
-                            <i class="bi bi-play-fill"></i> Continuer
-                        </a>
-                    {% endif %}
-
-                    {% if mission.status == 'completed' or mission.status == 'cancelled' %}
-                        <form method="post" action="{{ path('app_mission_delete', {'id': mission.id}) }}" style="display: inline-block;">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mission.id) }}">
-                            <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');">
-                                <i class="bi bi-trash"></i> Supprimer
-                            </button>
-                        </form>
-                    {% endif %}
+                    <form method="post" action="{{ path('app_mission_delete', {'id': mission.id}) }}" onsubmit="return confirm('Are you sure you want to delete this mission?');" style="width: 100%;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mission.id) }}">
+                        <button class="btn btn-danger" style="width: 100%;">
+                            <i class="fas fa-trash"></i> Delete Mission
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .mission-log {
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: monospace;
-        }
-        .log-entry p {
-            font-size: 0.9rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 3px;
-        }
-    </style>
 {% endblock %}
