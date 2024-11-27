@@ -5,6 +5,86 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
+        .header-section {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+
+        .hero-status {
+            margin-bottom: 2rem;
+        }
+
+        .badge {
+            background: var(--accent-color);
+        }
+
+        .badge-status {
+            background: #666;
+        }
+
+        .badge-status.badge-active {
+            background: #4CAF50;
+        }
+
+        .hero-details-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .details-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .detail-note {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress {
+            height: 10px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+        }
+
         .model3d-container {
             width: 100%;
             height: 400px;
@@ -12,84 +92,92 @@
             border-radius: var(--border-radius);
             overflow: hidden;
         }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .back-button {
+            color: var(--text-color);
+        }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="header-section" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
-        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary" style="color: var(--text-color);">
+    <div class="header-section">
+        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary back-button">
             <i class="fas fa-arrow-left"></i> Back to Gallery
         </a>
     </div>
 
     <div class="card">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-            <div>
-                <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--secondary-color);">
-                    {{ super_hero.name }}
-                </h1>
+        <div>
+            <h1 class="hero-title">{{ super_hero.name }}</h1>
 
-                <div style="margin-bottom: 2rem;">
-                    {% if super_hero.team %}
-                        <span class="badge" style="background: var(--accent-color);">
-                            {{ super_hero.team.name }}
-                        </span>
-                    {% endif %}
-                    <span class="badge" style="background: {{ super_hero.isActive ? '#4CAF50' : '#666' }};">
-                        {{ super_hero.isActive ? 'Active' : 'Inactive' }}
+            <div class="hero-status">
+                {% if super_hero.team %}
+                    <span class="badge">
+                        {{ super_hero.team.name }}
                     </span>
-                </div>
-
-                <div style="margin-bottom: 2rem;">
-                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Hero Details</h3>
-                    <div style="display: grid; gap: 1rem;">
-                        <div>
-                            <strong>Alias:</strong>
-                            <span>{{ super_hero.alias }}</span>
-                        </div>
-                        {% if super_hero.power %}
-                            <div>
-                                <strong>Power:</strong>
-                                <span>{{ super_hero.power.name }}</span>
-                                {% if super_hero.power.description %}
-                                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
-                                        {{ super_hero.power.description }}
-                                    </p>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        {% if super_hero.weakness %}
-                            <div>
-                                <strong>Weakness:</strong>
-                                <span>{{ super_hero.weakness }}</span>
-                            </div>
-                        {% endif %}
-                        <div>
-                            <strong>Energy Level:</strong>
-                            <div class="progress" style="height: 10px; background: rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; margin-top: 0.5rem;">
-                                <div style="width: {{ super_hero.energy }}%; height: 100%; background: var(--primary-color);"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-actions">
-                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn">
-                        <i class="fas fa-edit"></i> Edit Hero
-                    </a>
-                    {{ include('super_hero/_delete_form.html.twig') }}
-                </div>
-            </div>
-
-            <div>
-                {% if super_hero.model3dPath %}
-                    <div class="model3d-container" id="model3d-viewer"></div>
-                {% else %}
-                    <div style="height: 400px; background: var(--background-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-user-astronaut" style="font-size: 5rem; color: var(--primary-color);"></i>
-                    </div>
                 {% endif %}
+                <span class="badge {{ super_hero.isActive ? 'badge-active' : 'badge-inactive' }}">
+                    {{ super_hero.isActive ? 'Active' : 'Inactive' }}
+                </span>
             </div>
+
+            <div class="hero-details-section">
+                <h3 class="section-title">Hero Details</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <strong>Alias:</strong>
+                        <span>{{ super_hero.alias }}</span>
+                    </div>
+                    {% if super_hero.power %}
+                        <div class="detail-item">
+                            <strong>Power:</strong>
+                            <span>{{ super_hero.power.name }}</span>
+                            {% if super_hero.power.description %}
+                                <p class="detail-note">
+                                    {{ super_hero.power.description }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if super_hero.weakness %}
+                        <div class="detail-item">
+                            <strong>Weakness:</strong>
+                            <span>{{ super_hero.weakness }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="detail-item">
+                        <strong>Energy Level:</strong>
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar" style="width: {{ super_hero.energy }}%;"></div>
+                            </div>
+                            <span>{{ super_hero.energy }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-actions">
+                <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn">
+                    <i class="fas fa-edit"></i> Edit Hero
+                </a>
+                {{ include('super_hero/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div>
+            {% if super_hero.model3dPath %}
+                <div class="model3d-container" id="model3d-viewer"></div>
+            {% else %}
+                <div class="model-container">
+                    <i class="fas fa-user-astronaut hero-icon"></i>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
