@@ -80,37 +80,12 @@ function initializeMissionProgress() {
     }
 }
 
-// Card hover effects
-function initializeCardEffects() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            
-            const angleX = (y - centerY) / 20;
-            const angleY = (centerX - x) / 20;
-            
-            card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.02)`;
-        });
-        
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-        });
-    });
-}
-
 // Initialize everything when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     createStars();
     initializeTooltips();
     animateProgressBars();
     initializeMissionProgress();
-    initializeCardEffects();
     
     // Add star twinkling animation
     const style = document.createElement('style');
