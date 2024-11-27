@@ -23,34 +23,53 @@
                 const power = document.querySelector('#filter-power').value;
 
                 if (name) {
-                    addFilterTag('Nom: ' + name);
+                    addFilterTag('Nom: ' + name, 'filter-name');
                 }
                 if (team) {
                     const teamSelect = document.querySelector('#filter-team');
                     const teamName = teamSelect.options[teamSelect.selectedIndex].text;
-                    addFilterTag('Équipe: ' + teamName);
+                    addFilterTag('Équipe: ' + teamName, 'filter-team');
                 }
                 if (status) {
-                    addFilterTag('Statut: ' + status);
+                    const statusSelect = document.querySelector('#filter-status');
+                    const statusText = statusSelect.options[statusSelect.selectedIndex].text;
+                    addFilterTag('Statut: ' + statusText, 'filter-status');
                 }
                 if (power) {
                     const powerSelect = document.querySelector('#filter-power');
                     const powerName = powerSelect.options[powerSelect.selectedIndex].text;
-                    addFilterTag('Pouvoir: ' + powerName);
+                    addFilterTag('Pouvoir: ' + powerName, 'filter-power');
                 }
             }
 
             // Fonction pour ajouter un tag de filtre
-            function addFilterTag(text) {
+            function addFilterTag(text, inputId) {
                 const activeFilters = document.querySelector('.active-filters');
                 const tag = document.createElement('span');
                 tag.className = 'filter-tag';
+                tag.dataset.inputId = inputId;
                 tag.innerHTML = `
                     ${text}
                     <span class="remove-tag">
                         <i class="fas fa-times"></i>
                     </span>
                 `;
+
+                // Ajouter l'événement de clic sur le bouton de fermeture
+                tag.querySelector('.remove-tag').addEventListener('click', function() {
+                    // Réinitialiser la valeur du champ correspondant
+                    const input = document.querySelector('#' + inputId);
+                    if (input) {
+                        input.value = '';
+                        // Déclencher l'événement change pour mettre à jour les filtres
+                        input.dispatchEvent(new Event('change'));
+                    }
+                    // Supprimer le tag
+                    tag.remove();
+                    // Mettre à jour la grille
+                    updateHeroGrid();
+                });
+
                 activeFilters.appendChild(tag);
             }
 

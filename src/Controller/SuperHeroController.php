@@ -37,9 +37,10 @@ final class SuperHeroController extends AbstractController{
                 ->setParameter('teamId', $teamId);
         }
 
-        if ($status) {
-            $queryBuilder->andWhere('sh.status = :status')
-                ->setParameter('status', $status);
+        if ($status !== null && $status !== '') {
+            $isActive = $status === 'active';
+            $queryBuilder->andWhere('sh.is_active = :status')
+                ->setParameter('status', $isActive);
         }
 
         if ($powerId) {
