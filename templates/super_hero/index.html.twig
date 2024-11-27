@@ -1,111 +1,72 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Super-Héros{% endblock %}
+{% block title %}Super Heroes Gallery{% endblock %}
 
 {% block body %}
-    <div class="stars-container">
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Super Heroes Gallery
+        </h1>
+        <a href="{{ path('app_super_hero_new') }}" class="btn">
+            <i class="fas fa-plus"></i> New Hero
+        </a>
     </div>
-    <div class="container mt-5">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Sidebar gauche avec un fond héroïque -->
-                <div class="col-md-3 superhero-sidebar bg-dark p-4 text-light rounded-lg">
-                    <h1 class="display-4 text-warning font-weight-bold text-shadow">Nos Super-Héros</h1>
-                    <p class="lead text-light">Voici une galerie de nos héros et héroïnes extraordinaires. Découvrez leur force et leur courage !</p>
-                    <p class="lead text-light font-italic mt-4">Ils sont prêts à sauver le monde !</p>
+
+    <div class="grid">
+        {% for super_hero in super_heroes %}
+            <div class="card" style="position: relative; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem;">
+                    {% if super_hero.team %}
+                        <span class="badge" style="background: var(--accent-color);">
+                            {{ super_hero.team.name }}
+                        </span>
+                    {% endif %}
+                    <span class="badge" style="background: {{ super_hero.isActive ? '#4CAF50' : '#666' }};">
+                        {{ super_hero.isActive ? 'Active' : 'Inactive' }}
+                    </span>
                 </div>
 
-                <!-- Contenu principal à droite -->
-                <div class="col-md-9">
-                    <div class="superhero-background py-5 rounded-3 shadow-lg mb-4">
-                        <div class="text-center">
-                            <p class="lead text-light font-italic">Explorez nos héros dans cette galerie</p>
-                        </div>
-                    </div>
+                <h2 style="font-size: 1.5rem; margin: 0 0 1rem;">{{ super_hero.name }}</h2>
+                
+                {% if super_hero.alias %}
+                    <p style="color: #666; margin: 0 0 1rem;">{{ super_hero.alias }}</p>
+                {% endif %}
 
-                    <!-- Liste des Super-Héros sous forme de Cards -->
-                    <div class="row">
-                        {% for super_hero in super_heroes %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card shadow-sm border-0 rounded-lg h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">{{ super_hero.name }}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ super_hero.alias }}</h6>
-                                        <p class="card-text">
-                                            <strong>Pouvoir :</strong> 
-                                            <span class="text-success">
-                                                {% if super_hero.power %}
-                                                    {{ super_hero.power.name }}<br>
-                                                    <strong>Description : </strong>{{ super_hero.power.description }}
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </span><br>
-                                            
-                                            <strong>Faiblesse :</strong> 
-                                            <span class="text-danger">
-                                                {% if super_hero.weakness %}
-                                                    {{ super_hero.weakness }}
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </span><br>
-                                            
-                                            <strong>Équipe :</strong> 
-                                            <span class="text-info">
-                                                {% if super_hero.team %}
-                                                    {{ super_hero.team.name }}
-                                                {% else %}
-                                                    <span class="text-muted">-</span>
-                                                {% endif %}
-                                            </span><br>
-                                            
-                                            <strong>Statut :</strong>
-                                            {% if super_hero.isActive %}
-                                                <span class="badge bg-success">Actif</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Inactif</span>
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                    <div class="card-footer text-muted d-flex justify-content-between">
-                                        <a href="{{ path('app_super_hero_show', {'id': super_hero.id}) }}" class="btn btn-primary btn-sm">
-                                            <i class="bi bi-eye"></i> Voir
-                                        </a>
-                                        <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-warning btn-sm">
-                                            <i class="bi bi-pencil"></i> Modifier
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="col-12 text-center">
-                                <em>Aucun super-héros trouvé.</em>
-                            </div>
-                        {% endfor %}
+                {% if super_hero.power %}
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Power:</strong> {{ super_hero.power.name }}
+                        {% if super_hero.power.description %}
+                            <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">
+                                {{ super_hero.power.description }}
+                            </p>
+                        {% endif %}
                     </div>
+                {% endif %}
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Energy Level:</strong>
+                    <div class="progress" style="height: 10px; background: rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; margin-top: 0.5rem;">
+                        <div style="width: {{ super_hero.energy }}%; height: 100%; background: var(--primary-color);"></div>
+                    </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <a href="{{ path('app_super_hero_show', {'id': super_hero.id}) }}" class="btn">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
                 </div>
             </div>
-        </div>
-        <!-- Boutons d'action -->
-        <div class="d-flex justify-content-end gap-3 mt-4">
-            <a href="{{ path('app_mission_index') }}" class="btn btn-info">
-                <i class="bi bi-trophy"></i> Missions
-            </a>
-            <a href="{{ path('power_index') }}" class="btn btn-warning">
-                <i class="bi bi-lightning-charge-fill"></i> Gérer les Pouvoirs
-            </a>
-            <a href="{{ path('app_super_hero_new') }}" class="btn btn-success">
-                <i class="bi bi-person-plus-fill"></i> Ajouter un Super-Héros
-            </a>
-            <a href="{{ path('app_team_index') }}" class="btn btn-primary">
-                <i class="bi bi-people-fill"></i> Gérer les Équipes
-            </a>
-        </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 3rem;">
+                <i class="fas fa-user-astronaut" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <p style="margin: 0; font-size: 1.2rem;">No heroes found. Be the first to create one!</p>
+                <a href="{{ path('app_super_hero_new') }}" class="btn" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> Add Hero
+                </a>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}

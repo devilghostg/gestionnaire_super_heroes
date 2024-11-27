@@ -1,126 +1,112 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails du Super-héros{% endblock %}
+{% block title %}{{ super_hero.name }} - Hero Profile{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        #model3dContainer {
+        .model3d-container {
             width: 100%;
             height: 400px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-            border-radius: 10px;
-            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            overflow: hidden;
         }
     </style>
 {% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="{{ asset('js/hero3d.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if super_hero.model3dPath %}
-                console.log('Initializing 3D viewer with model:', '{{ asset(super_hero.model3dPath) }}');
-                new Hero3DViewer('model3dContainer', '{{ asset(super_hero.model3dPath) }}');
-            {% endif %}
-        });
-    </script>
-{% endblock %}
-
 {% block body %}
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h1>{{ super_hero.name }}</h1>
-            </div>
-            <div class="card-body">
-                {% if super_hero.model3dPath %}
-                    <div id="model3dContainer"></div>
-                {% endif %}
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <th>Id</th>
-                            <td>{{ super_hero.id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nom</th>
-                            <td>{{ super_hero.name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Alias</th>
-                            <td>{{ super_hero.alias }}</td>
-                        </tr>
-                        <tr>
-                            <th>Pouvoir</th>
-                            <td>
-                                {% if super_hero.power %}
-                                    {{ super_hero.power.name }}
-                                {% else %}
-                                    <span class="text-muted">Aucun pouvoir assigné</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Faiblesse</th>
-                            <td>{{ super_hero.weakness }}</td>
-                        </tr>
-                        <tr>
-                            <th>Statut</th>
-                            <td>
-                                {% if super_hero.isActive %}
-                                    <span class="badge bg-success">Actif</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Inactif</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Énergie</th>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar {% if super_hero.energy < 30 %}bg-danger{% elseif super_hero.energy < 70 %}bg-warning{% else %}bg-success{% endif %}" 
-                                         role="progressbar" 
-                                         style="width: {{ super_hero.energy }}%;" 
-                                         aria-valuenow="{{ super_hero.energy }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                        {{ super_hero.energy }}%
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Équipe</th>
-                            <td>
-                                {% if super_hero.team %}
-                                    <a href="{{ path('app_team_show', {'id': super_hero.team.id}) }}">
-                                        {{ super_hero.team.name }}
-                                    </a>
-                                {% else %}
-                                    <span class="text-muted">Aucune équipe assignée</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div class="header-section" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary" style="color: var(--text-color);">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
 
-                <div class="mt-4">
-                    <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Retour à la liste
+    <div class="card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--secondary-color);">
+                    {{ super_hero.name }}
+                </h1>
+
+                <div style="margin-bottom: 2rem;">
+                    {% if super_hero.team %}
+                        <span class="badge" style="background: var(--accent-color);">
+                            {{ super_hero.team.name }}
+                        </span>
+                    {% endif %}
+                    <span class="badge" style="background: {{ super_hero.isActive ? '#4CAF50' : '#666' }};">
+                        {{ super_hero.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Hero Details</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <div>
+                            <strong>Alias:</strong>
+                            <span>{{ super_hero.alias }}</span>
+                        </div>
+                        {% if super_hero.power %}
+                            <div>
+                                <strong>Power:</strong>
+                                <span>{{ super_hero.power.name }}</span>
+                                {% if super_hero.power.description %}
+                                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                                        {{ super_hero.power.description }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if super_hero.weakness %}
+                            <div>
+                                <strong>Weakness:</strong>
+                                <span>{{ super_hero.weakness }}</span>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <strong>Energy Level:</strong>
+                            <div class="progress" style="height: 10px; background: rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; margin-top: 0.5rem;">
+                                <div style="width: {{ super_hero.energy }}%; height: 100%; background: var(--primary-color);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn">
+                        <i class="fas fa-edit"></i> Edit Hero
                     </a>
-
-                    <a href="{{ path('app_super_hero_edit', {'id': super_hero.id}) }}" class="btn btn-primary">
-                        <i class="bi bi-pencil"></i> Modifier
-                    </a>
-
                     {{ include('super_hero/_delete_form.html.twig') }}
                 </div>
             </div>
+
+            <div>
+                {% if super_hero.model3dPath %}
+                    <div class="model3d-container" id="model3d-viewer"></div>
+                {% else %}
+                    <div style="height: 400px; background: var(--background-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user-astronaut" style="font-size: 5rem; color: var(--primary-color);"></i>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% if super_hero.model3dPath %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+        <script src="{{ asset('js/hero3d.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const modelPath = '{{ asset(super_hero.model3dPath) }}';
+                console.log('Loading 3D model from:', modelPath);
+                const viewer = new Hero3DViewer('model3d-viewer', modelPath);
+            });
+        </script>
+    {% endif %}
 {% endblock %}

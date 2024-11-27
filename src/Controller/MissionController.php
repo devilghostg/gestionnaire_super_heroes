@@ -465,6 +465,24 @@ class MissionController extends AbstractController
         return $this->redirectToRoute('app_mission_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    #[Route('/{id}/edit', name: 'app_mission_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Mission $mission, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(MissionType::class, $mission);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Mission updated successfully.');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        return $this->render('mission/edit.html.twig', [
+            'mission' => $mission,
+            'form' => $form,
+        ]);
+    }
+
     private function archiveAndDeleteMission(Mission $mission, MissionRepository $missionRepository, MissionHistoryRepository $missionHistoryRepository, EntityManagerInterface $entityManager): void
     {
         // Créer une entrée dans l'historique

@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Mission{% endblock %}
+
+{% block body %}
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Edit Mission
+            </h1>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+        {{ form_start(form, {'attr': {'class': 'form', 'style': 'width: 100%;'}}) }}
+            <div style="display: grid; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label', 'style': 'font-weight: 600; margin-bottom: 0.5rem;'}}) }}
+                    {{ form_widget(form.title, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ddd;'}}) }}
+                    {{ form_errors(form.title) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label', 'style': 'font-weight: 600; margin-bottom: 0.5rem;'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ddd; min-height: 120px;'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        {{ form_label(form.difficulty, 'Difficulty', {'label_attr': {'class': 'form-label', 'style': 'font-weight: 600; margin-bottom: 0.5rem;'}}) }}
+                        {{ form_widget(form.difficulty, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ddd;'}}) }}
+                        {{ form_errors(form.difficulty) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.timeLimit, 'Time Limit (seconds)', {'label_attr': {'class': 'form-label', 'style': 'font-weight: 600; margin-bottom: 0.5rem;'}}) }}
+                        {{ form_widget(form.timeLimit, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ddd;'}}) }}
+                        {{ form_errors(form.timeLimit) }}
+                    </div>
+                </div>
+
+                {% if form.requiredPowers is defined %}
+                    <div class="form-group">
+                        {{ form_label(form.requiredPowers, 'Required Powers', {'label_attr': {'class': 'form-label', 'style': 'font-weight: 600; margin-bottom: 0.5rem;'}}) }}
+                        {{ form_widget(form.requiredPowers, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #ddd;'}}) }}
+                        {{ form_errors(form.requiredPowers) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="btn-group" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary" style="text-decoration: none;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn" style="min-width: 120px;">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

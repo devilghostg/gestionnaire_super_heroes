@@ -1,0 +1,128 @@
+/* Space Background */
+.space-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(45deg, #0B0B1F 0%, #1A1B3A 100%);
+}
+
+/* Planets */
+.planet {
+    position: absolute;
+    border-radius: 50%;
+    animation: rotate 100s infinite linear;
+}
+
+.planet-1 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle at 30% 30%, #6C63FF 0%, #4B45B2 100%);
+    box-shadow: 
+        0 0 50px rgba(108, 99, 255, 0.3),
+        inset -30px -30px 50px rgba(0,0,0,0.5);
+    top: 10%;
+    right: -100px;
+    opacity: 0.6;
+}
+
+.planet-2 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle at 30% 30%, #FF6584 0%, #B23D54 100%);
+    box-shadow: 
+        0 0 40px rgba(255, 101, 132, 0.3),
+        inset -20px -20px 40px rgba(0,0,0,0.5);
+    bottom: -50px;
+    left: -50px;
+    opacity: 0.5;
+    animation-duration: 120s;
+}
+
+.planet-3 {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle at 30% 30%, #2F2E41 0%, #1A1B3A 100%);
+    box-shadow: 
+        0 0 30px rgba(47, 46, 65, 0.3),
+        inset -15px -15px 30px rgba(0,0,0,0.5);
+    top: 60%;
+    right: 10%;
+    opacity: 0.4;
+    animation-duration: 80s;
+}
+
+/* Stars */
+.stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.stars:before,
+.stars:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: twinkle 4s infinite;
+}
+
+.stars:after {
+    background-size: 300px 300px;
+    animation: twinkle 6s infinite;
+    animation-delay: 1s;
+}
+
+/* Animations */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes twinkle {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Container styles */
+.container {
+    max-width: 1200px;
+    margin: 6rem auto 2rem;
+    padding: 2rem;
+    background: var(--background-color);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* Main container for content */
+.main-container {
+    max-width: 1200px;
+    margin: 6rem auto 2rem;
+    padding: 0 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container,
+    .main-container {
+        padding: 1rem;
+        margin-top: 4rem;
+    }
+}
