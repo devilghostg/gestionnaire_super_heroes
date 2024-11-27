@@ -1,0 +1,11 @@
+:root {
+    --primary-color: #6C63FF;
+    --secondary-color: #FF6584;
+    --accent-color: #2F2E41;
+    --background-color: rgba(248, 249, 254, 0.9);
+    --card-background: rgba(255, 255, 255, 0.9);
+    --text-color: #2F2E41;
+    --border-radius: 16px;
+    --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --navbar-height: 70px;
+}

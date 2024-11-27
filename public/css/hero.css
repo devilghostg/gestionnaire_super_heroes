@@ -1,0 +1,274 @@
+/* Hero Profile Styles */
+.header-section {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.hero-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+.hero-status {
+    margin-bottom: 2rem;
+}
+
+.badge-status {
+    background: #666;
+}
+
+.badge-status.badge-active {
+    background: #4CAF50;
+}
+
+.hero-details-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+.hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--accent-color);
+}
+
+.hero-powers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.hero-description {
+    line-height: 1.8;
+    color: var(--text-color);
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+}
+
+/* Hero Grid Layout */
+.hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Hero Card */
+.hero-card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: fit-content;
+}
+
+.hero-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Card Elements */
+.hero-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.hero-alias {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.hero-status {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* Powers Section */
+.hero-powers {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.power-title {
+    color: #333;
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+}
+
+.power-name {
+    font-size: 1.1rem;
+    color: #444;
+}
+
+.power-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0.5rem 0 0;
+}
+
+/* Energy Section */
+.energy-section {
+    margin-bottom: 1.5rem;
+}
+
+.energy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+/* Badges */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--primary-color);
+    color: white;
+}
+
+.badge-status {
+    background: #666;
+}
+
+.badge-status.badge-active {
+    background: #4CAF50;
+}
+
+/* Actions */
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+}
+
+.hero-actions .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Empty State */
+.card {
+    background: var(--card-background);
+    text-align: center;
+    padding: 3rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .hero-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-card {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

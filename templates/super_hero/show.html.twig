@@ -4,104 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        .header-section {
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--secondary-color);
-        }
-
-        .hero-status {
-            margin-bottom: 2rem;
-        }
-
-        .badge {
-            background: var(--accent-color);
-        }
-
-        .badge-status {
-            background: #666;
-        }
-
-        .badge-status.badge-active {
-            background: #4CAF50;
-        }
-
-        .hero-details-section {
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .details-grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .detail-item {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .detail-note {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .progress {
-            height: 10px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--primary-color);
-        }
-
-        .model3d-container {
-            width: 100%;
-            height: 400px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .back-button {
-            color: var(--text-color);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/hero.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -154,7 +57,7 @@
                         <strong>Energy Level:</strong>
                         <div class="progress-container">
                             <div class="progress">
-                                <div class="progress-bar" style="width: {{ super_hero.energy }}%;"></div>
+                                <div class="progress-bar"></div>
                             </div>
                             <span>{{ super_hero.energy }}%</span>
                         </div>

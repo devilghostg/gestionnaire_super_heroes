@@ -2,12 +2,15 @@
 
 {% block title %}Missions Gallery{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/mission.css') }}">
+{% endblock %}
+
 {% block body %}
-    <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            Missions Gallery
-        </h1>
-        <div style="display: flex; gap: 1rem;">
+    <div class="mission-header">
+        <h1 class="mission-title">Missions Gallery</h1>
+        <div class="header-actions">
             <a href="{{ path('app_mission_history') }}" class="btn btn-secondary">
                 <i class="fas fa-history"></i> History
             </a>
@@ -21,42 +24,42 @@
         {% for mission in missions %}
             <div class="card">
                 <div class="card-body">
-                    <div style="position: absolute; top: 1rem; right: 1rem;">
-                        <span class="badge {% if mission.status == 'completed' %}badge-success{% elseif mission.status == 'in_progress' %}badge-warning{% else %}badge-secondary{% endif %}">
+                    <div class="mission-status-badge">
+                        <span class="badge mission-status {% if mission.status == 'completed' %}badge-success{% elseif mission.status == 'in_progress' %}badge-warning{% else %}badge-secondary{% endif %}">
                             {{ mission.status|title|replace({'_': ' '}) }}
                         </span>
                     </div>
 
-                    <h2 style="font-size: 1.5rem; margin: 0 0 1rem;">{{ mission.title }}</h2>
+                    <h2 class="mission-card-title">{{ mission.title }}</h2>
                     
                     {% if mission.description %}
-                        <p style="color: #666; margin: 0 0 1.5rem;">{{ mission.description }}</p>
+                        <p class="mission-card-description">{{ mission.description }}</p>
                     {% endif %}
 
-                    <div style="margin-bottom: 1.5rem;">
+                    <div class="mission-heroes">
                         <strong>Assigned Heroes:</strong>
                         {% if mission.superHero %}
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                            <div class="heroes-list">
                                 <span class="badge badge-info">
                                     {{ mission.superHero.name }}
                                 </span>
                             </div>
                         {% else %}
-                            <p style="color: #666; margin: 0.5rem 0 0;">No heroes assigned yet</p>
+                            <p class="no-heroes">No heroes assigned yet</p>
                         {% endif %}
                     </div>
 
                     {% if mission.startedAt %}
-                        <div style="margin-bottom: 1rem;">
+                        <div class="mission-dates">
                             <strong>Start Date:</strong>
-                            <span style="color: #666;">{{ mission.startedAt|date('Y-m-d H:i') }}</span>
+                            <span>{{ mission.startedAt|date('Y-m-d H:i') }}</span>
                         </div>
                     {% endif %}
 
                     {% if mission.completedAt %}
-                        <div style="margin-bottom: 1.5rem;">
+                        <div class="mission-dates">
                             <strong>End Date:</strong>
-                            <span style="color: #666;">{{ mission.completedAt|date('Y-m-d H:i') }}</span>
+                            <span>{{ mission.completedAt|date('Y-m-d H:i') }}</span>
                         </div>
                     {% endif %}
                 </div>
