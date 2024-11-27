@@ -66,9 +66,17 @@
                                 {% if mission.superHero %}
                                     <h6 class="mt-3">Héros assigné</h6>
                                     <p>{{ mission.superHero.name }}</p>
+                                    
+                                    {% if mission.status == 'pending' %}
+                                        <form action="{{ path('app_mission_progress', {'id': mission.id}) }}" method="get" class="mt-3">
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="bi bi-play-fill"></i> Commencer la mission
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                 {% endif %}
 
-                                {% if mission.status == 'pending' %}
+                                {% if mission.status == 'pending' and not mission.superHero %}
                                     <h6 class="mt-3">Assigner un héros</h6>
                                     <form method="post" id="assignForm">
                                         <input type="hidden" name="_token" value="{{ csrf_token('assign' ~ mission.id) }}">
@@ -80,20 +88,6 @@
                                         </select>
                                         <button type="submit" class="btn btn-primary" id="assignButton" disabled>
                                             Assigner
-                                        </button>
-                                    </form>
-                                {% endif %}
-
-                                {% if mission.status == 'in_progress' %}
-                                    <h6 class="mt-3">Terminer la mission</h6>
-                                    <form action="{{ path('app_mission_complete', {'id': mission.id}) }}" method="post">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('complete' ~ mission.id) }}">
-                                        <div class="mb-3">
-                                            <label for="result" class="form-label">Résultat</label>
-                                            <textarea class="form-control" id="result" name="result" rows="3"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-success">
-                                            Terminer la mission
                                         </button>
                                     </form>
                                 {% endif %}

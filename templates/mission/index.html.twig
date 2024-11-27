@@ -16,6 +16,12 @@
             </div>
         </div>
 
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div class="row">
             <div class="col-md-8">
                 <h2>Missions en cours</h2>
@@ -55,9 +61,17 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-sm btn-info">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
+                                        <div class="btn-group">
+                                            <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_mission_delete', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');" class="d-inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mission.id) }}">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endif %}
@@ -76,6 +90,7 @@
                                 <th>Mission</th>
                                 <th>Héros</th>
                                 <th>Score</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -84,6 +99,19 @@
                                 <td>{{ mission.title }}</td>
                                 <td>{{ mission.superHero.name }}</td>
                                 <td class="text-end">{{ mission.score }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_mission_delete', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mission.id) }}">
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mission en cours : {{ mission.title }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .progress {
+            height: 25px;
+        }
+        .battle-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .hero-stats {
+            border-left: 3px solid #007bff;
+            padding-left: 15px;
+        }
+        .villain-stats {
+            border-left: 3px solid #dc3545;
+            padding-left: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">{{ mission.title }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h4>Progression de la mission</h4>
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             id="missionProgress"
+                             style="width: 0%">
+                            <span id="progressText">0%</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Temps écoulé: <span id="elapsedTime">00:00</span></span>
+                        <span>Temps restant: <span id="remainingTime">{{ mission.timeLimit }}s</span></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="hero-stats">
+                        <h5>{{ mission.superHero.name }}</h5>
+                        <p class="mb-1">Énergie: <span id="heroEnergy">100</span>%</p>
+                        <p class="mb-1">Efficacité: <span id="heroEfficiency">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="battle-log card">
+                <div class="card-header">
+                    <h5 class="mb-0">Journal de mission</h5>
+                </div>
+                <div class="card-body">
+                    <div id="battleLog" class="battle-log">
+                        <p class="text-muted">La mission commence...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form id="cancelMissionForm" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" method="post" class="d-inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
+                <button type="submit" class="btn btn-danger" id="cancelButton">
+                    <i class="bi bi-x-circle"></i> Annuler la mission
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const missionData = {
+        timeLimit: {{ mission.timeLimit }},
+        difficulty: {{ mission.difficulty }},
+        heroId: {{ mission.superHero.id }},
+        missionId: {{ mission.id }}
+    };
+
+    let startTime = Date.now();
+    let progressInterval;
+    let battleEvents = [];
+    
+    function updateProgress() {
+        const elapsedTime = (Date.now() - startTime) / 1000;
+        const progress = Math.min((elapsedTime / missionData.timeLimit) * 100, 100);
+        
+        document.getElementById('missionProgress').style.width = progress + '%';
+        document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        document.getElementById('elapsedTime').textContent = formatTime(elapsedTime);
+        document.getElementById('remainingTime').textContent = formatTime(Math.max(missionData.timeLimit - elapsedTime, 0));
+
+        // Générer des événements aléatoires
+        if (Math.random() < 0.1) {
+            generateBattleEvent();
+        }
+
+        // Vérifier si la mission est terminée
+        if (elapsedTime >= missionData.timeLimit) {
+            clearInterval(progressInterval);
+            completeMission();
+        }
+    }
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function generateBattleEvent() {
+        const events = [
+            "Le héros affronte un groupe d'ennemis !",
+            "Une situation critique nécessite une intervention rapide !",
+            "Le héros utilise ses pouvoirs spéciaux !",
+            "Un civil a besoin d'aide !",
+            "Le héros déjoue un piège !"
+        ];
+
+        const event = events[Math.floor(Math.random() * events.length)];
+        const success = Math.random() > 0.3;
+        const efficiency = Math.floor(Math.random() * 20) + 80;
+
+        const logEntry = document.createElement('p');
+        logEntry.className = success ? 'text-success' : 'text-danger';
+        logEntry.textContent = `${event} ${success ? '✓' : '✗'}`;
+
+        const battleLog = document.getElementById('battleLog');
+        battleLog.appendChild(logEntry);
+        battleLog.scrollTop = battleLog.scrollHeight;
+
+        // Mettre à jour les statistiques du héros
+        updateHeroStats(success, efficiency);
+        
+        battleEvents.push({
+            event,
+            success,
+            efficiency,
+            timestamp: Date.now() - startTime
+        });
+    }
+
+    function updateHeroStats(success, efficiency) {
+        const heroEnergy = document.getElementById('heroEnergy');
+        const heroEfficiency = document.getElementById('heroEfficiency');
+        
+        const currentEnergy = parseInt(heroEnergy.textContent);
+        const currentEfficiency = parseInt(heroEfficiency.textContent);
+        
+        // Mise à jour de l'énergie
+        const newEnergy = Math.max(0, currentEnergy - (success ? 5 : 10));
+        heroEnergy.textContent = newEnergy;
+        
+        // Mise à jour de l'efficacité
+        const newEfficiency = Math.round((currentEfficiency + efficiency) / 2);
+        heroEfficiency.textContent = newEfficiency;
+    }
+
+    function completeMission() {
+        const efficiency = parseInt(document.getElementById('heroEfficiency').textContent);
+        const energy = parseInt(document.getElementById('heroEnergy').textContent);
+        
+        // Envoyer les résultats au serveur
+        fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token('complete' ~ mission.id) }}'
+            },
+            body: JSON.stringify({
+                efficiency: efficiency,
+                energy: energy,
+                events: battleEvents
+            })
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '{{ path('app_mission_show', {'id': mission.id}) }}';
+            }
+        });
+    }
+
+    // Démarrer le suivi de la progression
+    progressInterval = setInterval(updateProgress, 1000);
+
+    // Gérer l'annulation de la mission
+    document.getElementById('cancelMissionForm').addEventListener('submit', function(e) {
+        if (!confirm('Êtes-vous sûr de vouloir annuler cette mission ?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
