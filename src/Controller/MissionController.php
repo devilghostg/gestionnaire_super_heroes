@@ -385,28 +385,24 @@ class MissionController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'app_mission_delete', methods: ['POST'])]
-    public function delete(Request $request, Mission $mission, EntityManagerInterface $entityManager, MissionHistoryRepository $missionHistoryRepository): Response
-    {
+    public function delete(
+        Request $request, 
+        Mission $mission, 
+        EntityManagerInterface $entityManager,
+        MissionRepository $missionRepository,
+        MissionHistoryRepository $missionHistoryRepository
+    ): Response {
         if ($this->isCsrfTokenValid('delete'.$mission->getId(), $request->request->get('_token'))) {
-            // Créer une entrée dans l'historique
-            $missionHistory = new MissionHistory();
-            $missionHistory->setTitle($mission->getTitle())
-                ->setDescription($mission->getDescription())
-                ->setDifficulty($mission->getDifficulty())
-                ->setDeletedAt(new \DateTimeImmutable())
-                ->setStatus($mission->getStatus());
-
-            if ($mission->getSuperHero()) {
-                $missionHistory->setHeroName($mission->getSuperHero()->getName());
+            // Vérifier que la mission peut être supprimée
+            if ($mission->getStatus() === 'completed' || $mission->getStatus() === 'cancelled') {
+                $this->archiveAndDeleteMission($mission, $missionRepository, $missionHistoryRepository, $entityManager);
+                $this->addFlash('success', 'La mission a été archivée et supprimée avec succès.');
+            } else {
+                $this->addFlash('error', 'Seules les missions terminées ou annulées peuvent être supprimées.');
             }
-
-            // Sauvegarder l'historique et supprimer la mission
-            $entityManager->persist($missionHistory);
-            $entityManager->remove($mission);
-            $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_mission_index');
+        return $this->redirectToRoute('app_mission_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}/assign-hero', name: 'app_mission_assign_hero', methods: ['GET'])]
@@ -448,6 +444,27 @@ class MissionController extends AbstractController
         return $this->redirectToRoute('app_mission_index');
     }
 
+    #[Route('/{id}', name: 'app_mission_delete', methods: ['POST'])]
+    public function deleteMission(
+        Request $request, 
+        Mission $mission, 
+        EntityManagerInterface $entityManager,
+        MissionRepository $missionRepository,
+        MissionHistoryRepository $missionHistoryRepository
+    ): Response {
+        if ($this->isCsrfTokenValid('delete'.$mission->getId(), $request->request->get('_token'))) {
+            // Vérifier que la mission peut être supprimée
+            if ($mission->getStatus() === 'completed' || $mission->getStatus() === 'cancelled') {
+                $this->archiveAndDeleteMission($mission, $missionRepository, $missionHistoryRepository, $entityManager);
+                $this->addFlash('success', 'La mission a été archivée et supprimée avec succès.');
+            } else {
+                $this->addFlash('error', 'Seules les missions terminées ou annulées peuvent être supprimées.');
+            }
+        }
+
+        return $this->redirectToRoute('app_mission_index', [], Response::HTTP_SEE_OTHER);
+    }
+
     private function archiveAndDeleteMission(Mission $mission, MissionRepository $missionRepository, MissionHistoryRepository $missionHistoryRepository, EntityManagerInterface $entityManager): void
     {
         // Créer une entrée dans l'historique
@@ -461,7 +478,7 @@ class MissionController extends AbstractController
             ->setResult($mission->getResult());
 
         if ($mission->getSuperHero()) {
-            $missionHistory->setSuperHeroName($mission->getSuperHero()->getName());
+            $missionHistory->setHeroName($mission->getSuperHero()->getName());
         }
 
         $entityManager->persist($missionHistory);

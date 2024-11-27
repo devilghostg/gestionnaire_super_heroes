@@ -31,6 +31,12 @@ class MissionHistory
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $heroName = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $score = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $result = null;
+
     public function __construct()
     {
         $this->deletedAt = new \DateTimeImmutable();
@@ -104,6 +110,28 @@ class MissionHistory
     public function setHeroName(?string $heroName): static
     {
         $this->heroName = $heroName;
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): static
+    {
+        $this->score = $score;
+        return $this;
+    }
+
+    public function getResult(): ?string
+    {
+        return $this->result;
+    }
+
+    public function setResult(?string $result): static
+    {
+        $this->result = $result;
         return $this;
     }
 }
