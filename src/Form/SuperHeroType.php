@@ -46,7 +46,6 @@ class SuperHeroType extends AbstractType
                 'required' => false,
                 'choices' => [
                     'CesiumMan Hero' => '/models/heroes/cesiumman.glb',
-                    'Robot Tokyo' => '/models/heroes/littlesttokyo.glb',
                     'Helmet Hero' => '/models/heroes/helmet.glb',
                     'Duck Hero' => '/models/heroes/duck.glb',
                     'Box Hero' => '/models/heroes/box.glb',
