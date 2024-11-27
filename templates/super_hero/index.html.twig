@@ -83,22 +83,20 @@
                             </div>
                         {% endfor %}
                     </div>
-
-                    <!-- Bouton pour ajouter un Super-Héros -->
-                    <div class="text-end mt-4">
-                        <a href="{{ path('app_super_hero_new') }}" class="btn btn-success">
-                            <i class="bi bi-person-plus-fill"></i> Ajouter un Super-Héros
-                        </a>
-                    </div>
-
-                    <!-- Bouton pour créer une équipe -->
-                    <div class="text-end mt-4">
-                        <a href="{{ path('app_team_index') }}" class="btn btn-info">
-                            <i class="bi bi-plus-circle"></i> Créer une équipe
-                        </a>
-                    </div>
                 </div>
             </div>
+        </div>
+        <!-- Boutons d'action -->
+        <div class="d-flex justify-content-end gap-3 mt-4">
+            <a href="{{ path('power_index') }}" class="btn btn-info">
+                <i class="bi bi-lightning-charge-fill"></i> Gérer les Pouvoirs
+            </a>
+            <a href="{{ path('app_super_hero_new') }}" class="btn btn-success">
+                <i class="bi bi-person-plus-fill"></i> Ajouter un Super-Héros
+            </a>
+            <a href="{{ path('app_team_index') }}" class="btn btn-primary">
+                <i class="bi bi-people-fill"></i> Gérer les Équipes
+            </a>
         </div>
     </div>
 {% endblock %}
