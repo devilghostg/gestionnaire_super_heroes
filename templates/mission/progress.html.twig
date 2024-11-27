@@ -94,13 +94,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let battleEvents = [];
     
     function updateProgress() {
-        const elapsedTime = (Date.now() - startTime) / 1000;
-        const progress = Math.min((elapsedTime / missionData.timeLimit) * 100, 100);
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        // Arrondir au multiple de 60 le plus proche
+        const adjustedTime = Math.floor(elapsedTime / 60) * 60;
+        const progress = Math.min((adjustedTime / missionData.timeLimit) * 100, 100);
         
         document.getElementById('missionProgress').style.width = progress + '%';
         document.getElementById('progressText').textContent = Math.round(progress) + '%';
-        document.getElementById('elapsedTime').textContent = formatTime(elapsedTime);
-        document.getElementById('remainingTime').textContent = formatTime(Math.max(missionData.timeLimit - elapsedTime, 0));
+        
+        // Formater le temps écoulé en minutes:secondes
+        document.getElementById('elapsedTime').textContent = formatTime(adjustedTime);
+        // Calculer le temps restant en arrondissant au multiple de 60 supérieur
+        const remainingTime = Math.max(0, missionData.timeLimit - adjustedTime);
+        document.getElementById('remainingTime').textContent = formatTime(remainingTime);
 
         // Générer des événements aléatoires
         if (Math.random() < 0.1) {
@@ -108,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Vérifier si la mission est terminée
-        if (elapsedTime >= missionData.timeLimit) {
+        if (adjustedTime >= missionData.timeLimit) {
             clearInterval(progressInterval);
             completeMission();
         }

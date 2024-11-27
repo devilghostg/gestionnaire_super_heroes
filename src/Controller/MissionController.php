@@ -6,6 +6,7 @@ use App\Entity\Mission;
 use App\Entity\SuperHero;
 use App\Form\MissionType;
 use App\Repository\MissionRepository;
+use App\Repository\PowerRepository;
 use App\Repository\SuperHeroRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -175,7 +176,8 @@ class MissionController extends AbstractController
     #[Route('/random', name: 'app_mission_random', methods: ['POST'])]
     public function createRandom(
         EntityManagerInterface $entityManager,
-        Request $request
+        Request $request,
+        PowerRepository $powerRepository
     ): Response {
         if (!$this->isCsrfTokenValid('random_mission', $request->request->get('_token'))) {
             return $this->redirectToRoute('app_mission_index');
@@ -207,6 +209,14 @@ class MissionController extends AbstractController
             "Une bombe sophistiquée doit être désamorcée !"
         ];
 
+        // Récupérer tous les pouvoirs disponibles
+        $allPowers = $powerRepository->findAll();
+        
+        // Sélectionner un nombre aléatoire de pouvoirs (entre 1 et 3)
+        $numPowers = rand(1, 3);
+        shuffle($allPowers);
+        $selectedPowers = array_slice($allPowers, 0, $numPowers);
+
         $mission = new Mission();
         $mission->setTitle($titles[array_rand($titles)]);
         $mission->setDescription($descriptions[array_rand($descriptions)]);
@@ -215,10 +225,15 @@ class MissionController extends AbstractController
         $mission->setStatus('pending');
         $mission->setStartedAt(new \DateTimeImmutable());
 
+        // Ajouter les pouvoirs sélectionnés à la mission
+        foreach ($selectedPowers as $power) {
+            $mission->addRequiredPower($power);
+        }
+
         $entityManager->persist($mission);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Une nouvelle mission aléatoire a été créée !');
+        $this->addFlash('success', 'Une nouvelle mission aléatoire a été créée avec ' . count($selectedPowers) . ' pouvoir(s) requis !');
         return $this->redirectToRoute('app_mission_index');
     }
 

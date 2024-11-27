@@ -10,6 +10,12 @@
                 <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary me-2">
                     <i class="bi bi-house"></i> Accueil
                 </a>
+                <form action="{{ path('app_mission_random') }}" method="post" class="d-inline me-2">
+                    <input type="hidden" name="_token" value="{{ csrf_token('random_mission') }}">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-shuffle"></i> Mission aléatoire
+                    </button>
+                </form>
                 <a href="{{ path('app_mission_new') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Nouvelle mission
                 </a>
@@ -31,6 +37,7 @@
                             <tr>
                                 <th>Titre</th>
                                 <th>Difficulté</th>
+                                <th>Pouvoirs requis</th>
                                 <th>Statut</th>
                                 <th>Héros assigné</th>
                                 <th>Actions</th>
@@ -45,6 +52,15 @@
                                         {% for i in 1..mission.difficulty %}
                                             <i class="bi bi-star-fill text-warning"></i>
                                         {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if mission.requiredPowers|length > 0 %}
+                                            {% for power in mission.requiredPowers %}
+                                                <span class="badge bg-info me-1">{{ power.name }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">Aucun pouvoir requis</span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% if mission.status == 'pending' %}
