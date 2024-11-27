@@ -45,13 +45,15 @@ class SuperHeroType extends AbstractType
                 'label' => 'Modèle 3D',
                 'required' => false,
                 'choices' => [
-                    'Robot Hero' => '/models/heroes/robot_hero.glb',
-                    'Super Hero' => '/models/heroes/superhero.glb',
-                    'Iron Suit' => '/models/heroes/iron_suit.glb',
-                    'Captain Shield' => '/models/heroes/captain_shield.glb',
-                    'Spider Hero' => '/models/heroes/spider_hero.glb',
+                    'CesiumMan Hero' => '/models/heroes/cesiumman.glb',
+                    'Robot Tokyo' => '/models/heroes/littlesttokyo.glb',
+                    'Helmet Hero' => '/models/heroes/helmet.glb',
+                    'Duck Hero' => '/models/heroes/duck.glb',
+                    'Box Hero' => '/models/heroes/box.glb',
+                    'Cube Hero' => '/models/heroes/cube.glb',
                 ],
                 'placeholder' => 'Choisir un modèle 3D',
+                'attr' => ['class' => 'form-control model3d-select'],
             ])
             ->add('team', EntityType::class, [
                 'class' => Team::class,

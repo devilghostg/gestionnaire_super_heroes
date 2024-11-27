@@ -2,6 +2,19 @@
 
 {% block title %}Progression de la mission{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #model3dContainer {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     {% if mission is null %}
         <div class="container mt-4">
@@ -62,6 +75,9 @@
                                         </p>
                                     </div>
                                 </div>
+                                {% if mission.superHero.model3dPath %}
+                                    <div id="model3dContainer"></div>
+                                {% endif %}
                             {% else %}
                                 <div class="alert alert-warning">
                                     Aucun super-héros n'est assigné à cette mission
@@ -176,4 +192,18 @@
         });
         </script>
     {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="{{ asset('js/hero3d.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if mission.superHero.model3dPath %}
+                new Hero3DViewer('model3dContainer', '{{ asset(mission.superHero.model3dPath) }}');
+            {% endif %}
+        });
+    </script>
 {% endblock %}
