@@ -10,6 +10,9 @@
                 <a href="{{ path('app_super_hero_index') }}" class="btn btn-secondary me-2">
                     <i class="bi bi-house"></i> Accueil
                 </a>
+                <a href="{{ path('app_mission_cleanup') }}" class="btn btn-outline-danger me-2">
+                    <i class="bi bi-trash"></i> Nettoyer les missions annulées
+                </a>
                 <form action="{{ path('app_mission_random') }}" method="post" class="d-inline me-2">
                     <input type="hidden" name="_token" value="{{ csrf_token('random_mission') }}">
                     <button type="submit" class="btn btn-warning">
@@ -22,10 +25,12 @@
             </div>
         </div>
 
-        {% for message in app.flashes('success') %}
-            <div class="alert alert-success">
-                {{ message }}
-            </div>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         {% endfor %}
 
         <div class="row">
@@ -67,6 +72,14 @@
                                             <span class="badge bg-info">En attente</span>
                                         {% elseif mission.status == 'in_progress' %}
                                             <span class="badge bg-warning">En cours</span>
+                                        {% elseif mission.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Annulée</span>
+                                            {% if mission.cancelledAt %}
+                                                <br>
+                                                <small class="text-muted">
+                                                    Sera supprimée le {{ mission.cancelledAt|date_modify("+24 hours")|date('d/m/Y H:i') }}
+                                                </small>
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                     <td>

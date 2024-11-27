@@ -100,22 +100,17 @@ class MissionController extends AbstractController
     }
 
     #[Route('/{id}/cancel', name: 'app_mission_cancel', methods: ['POST'])]
-    public function cancel(
-        Mission $mission,
-        EntityManagerInterface $entityManager
-    ): Response {
-        if ($mission->getStatus() !== 'in_progress') {
-            $this->addFlash('error', 'Cette mission ne peut pas être annulée');
+    public function cancel(Request $request, Mission $mission, EntityManagerInterface $entityManager): Response
+    {
+        if (!$this->isCsrfTokenValid('cancel'.$mission->getId(), $request->request->get('_token'))) {
             return $this->redirectToRoute('app_mission_index');
         }
 
         $mission->setStatus('cancelled');
-        $mission->setResult('Mission annulée par le superviseur');
-        $mission->setCompletedAt(new \DateTimeImmutable());
-        
+        $mission->setCancelledAt(new \DateTimeImmutable());
         $entityManager->flush();
 
-        $this->addFlash('warning', 'La mission a été annulée');
+        $this->addFlash('warning', 'La mission a été annulée. Elle sera supprimée dans 24 heures.');
         return $this->redirectToRoute('app_mission_index');
     }
 
@@ -234,6 +229,27 @@ class MissionController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'Une nouvelle mission aléatoire a été créée avec ' . count($selectedPowers) . ' pouvoir(s) requis !');
+        return $this->redirectToRoute('app_mission_index');
+    }
+
+    #[Route('/cleanup-cancelled', name: 'app_mission_cleanup', methods: ['GET'])]
+    public function cleanupCancelledMissions(EntityManagerInterface $entityManager, MissionRepository $missionRepository): Response
+    {
+        $deletedCount = 0;
+        $cancelledMissions = $missionRepository->findBy(['status' => 'cancelled']);
+        
+        foreach ($cancelledMissions as $mission) {
+            if ($mission->getCancelledAt() && $mission->getCancelledAt()->modify('+24 hours') < new \DateTimeImmutable()) {
+                $entityManager->remove($mission);
+                $deletedCount++;
+            }
+        }
+        
+        if ($deletedCount > 0) {
+            $entityManager->flush();
+            $this->addFlash('info', sprintf('%d mission(s) annulée(s) ont été supprimées.', $deletedCount));
+        }
+        
         return $this->redirectToRoute('app_mission_index');
     }
 

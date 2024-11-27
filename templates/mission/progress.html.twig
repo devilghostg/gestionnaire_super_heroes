@@ -16,10 +16,6 @@
             border-left: 3px solid #007bff;
             padding-left: 15px;
         }
-        .villain-stats {
-            border-left: 3px solid #dc3545;
-            padding-left: 15px;
-        }
     </style>
 {% endblock %}
 
@@ -43,7 +39,7 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Temps écoulé: <span id="elapsedTime">00:00</span></span>
-                        <span>Temps restant: <span id="remainingTime">{{ mission.timeLimit }}s</span></span>
+                        <span>Temps limite: <span id="timeLimit">{{ mission.timeLimit }}s</span></span>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -92,37 +88,44 @@ document.addEventListener('DOMContentLoaded', function() {
     let startTime = Date.now();
     let progressInterval;
     let battleEvents = [];
+    let currentEnergy = 100;
+    let currentEfficiency = 0;
     
     function updateProgress() {
-        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-        // Arrondir au multiple de 60 le plus proche
-        const adjustedTime = Math.floor(elapsedTime / 60) * 60;
-        const progress = Math.min((adjustedTime / missionData.timeLimit) * 100, 100);
+        const currentTime = Date.now();
+        const elapsedMilliseconds = currentTime - startTime;
+        const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
         
-        document.getElementById('missionProgress').style.width = progress + '%';
-        document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        // Arrondir au multiple de 60 inférieur
+        const adjustedSeconds = Math.floor(elapsedSeconds / 60) * 60;
         
-        // Formater le temps écoulé en minutes:secondes
-        document.getElementById('elapsedTime').textContent = formatTime(adjustedTime);
-        // Calculer le temps restant en arrondissant au multiple de 60 supérieur
-        const remainingTime = Math.max(0, missionData.timeLimit - adjustedTime);
-        document.getElementById('remainingTime').textContent = formatTime(remainingTime);
-
-        // Générer des événements aléatoires
+        // Calculer le pourcentage de progression
+        const progressPercentage = Math.min((adjustedSeconds / missionData.timeLimit) * 100, 100);
+        
+        // Mettre à jour la barre de progression
+        const progressBar = document.getElementById('missionProgress');
+        progressBar.style.width = progressPercentage + '%';
+        progressBar.setAttribute('aria-valuenow', progressPercentage);
+        document.getElementById('progressText').textContent = Math.round(progressPercentage) + '%';
+        
+        // Mettre à jour les temps
+        document.getElementById('elapsedTime').textContent = formatTime(adjustedSeconds);
+        
+        // Générer des événements aléatoires (10% de chance par seconde)
         if (Math.random() < 0.1) {
             generateBattleEvent();
         }
 
         // Vérifier si la mission est terminée
-        if (adjustedTime >= missionData.timeLimit) {
+        if (adjustedSeconds >= missionData.timeLimit) {
             clearInterval(progressInterval);
             completeMission();
         }
     }
 
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        seconds = Math.floor(seconds % 60);
+    function formatTime(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const logEntry = document.createElement('p');
         logEntry.className = success ? 'text-success' : 'text-danger';
-        logEntry.textContent = `${event} ${success ? '✓' : '✗'}`;
+        logEntry.textContent = `${formatTime(Math.floor((Date.now() - startTime) / 1000))} - ${event} ${success ? '✓' : '✗'}`;
 
         const battleLog = document.getElementById('battleLog');
         battleLog.appendChild(logEntry);
@@ -159,24 +162,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateHeroStats(success, efficiency) {
-        const heroEnergy = document.getElementById('heroEnergy');
-        const heroEfficiency = document.getElementById('heroEfficiency');
+        // Réduire l'énergie en fonction du succès
+        currentEnergy = Math.max(0, currentEnergy - (success ? 5 : 10));
+        document.getElementById('heroEnergy').textContent = currentEnergy;
         
-        const currentEnergy = parseInt(heroEnergy.textContent);
-        const currentEfficiency = parseInt(heroEfficiency.textContent);
-        
-        // Mise à jour de l'énergie
-        const newEnergy = Math.max(0, currentEnergy - (success ? 5 : 10));
-        heroEnergy.textContent = newEnergy;
-        
-        // Mise à jour de l'efficacité
-        const newEfficiency = Math.round((currentEfficiency + efficiency) / 2);
-        heroEfficiency.textContent = newEfficiency;
+        // Mettre à jour l'efficacité (moyenne mobile)
+        currentEfficiency = Math.round((currentEfficiency + efficiency) / 2);
+        document.getElementById('heroEfficiency').textContent = currentEfficiency;
     }
 
     function completeMission() {
-        const efficiency = parseInt(document.getElementById('heroEfficiency').textContent);
-        const energy = parseInt(document.getElementById('heroEnergy').textContent);
+        // Désactiver le bouton d'annulation
+        document.getElementById('cancelButton').disabled = true;
         
         // Envoyer les résultats au serveur
         fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
@@ -186,8 +183,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRF-TOKEN': '{{ csrf_token('complete' ~ mission.id) }}'
             },
             body: JSON.stringify({
-                efficiency: efficiency,
-                energy: energy,
+                efficiency: currentEfficiency,
+                energy: currentEnergy,
                 events: battleEvents
             })
         }).then(response => {

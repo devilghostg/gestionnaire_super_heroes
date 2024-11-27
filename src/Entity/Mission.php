@@ -31,6 +31,9 @@ class Mission
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $cancelledAt = null;
+
     #[ORM\Column]
     private ?int $timeLimit = null;
 
@@ -112,6 +115,17 @@ class Mission
     public function setCompletedAt(?\DateTimeImmutable $completedAt): static
     {
         $this->completedAt = $completedAt;
+        return $this;
+    }
+
+    public function getCancelledAt(): ?\DateTimeImmutable
+    {
+        return $this->cancelledAt;
+    }
+
+    public function setCancelledAt(?\DateTimeImmutable $cancelledAt): self
+    {
+        $this->cancelledAt = $cancelledAt;
         return $this;
     }
 
