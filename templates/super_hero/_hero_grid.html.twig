@@ -1,0 +1,13 @@
+{% for super_hero in super_heroes %}
+    <div class="hero-card">
+        {{ include('super_hero/_card.html.twig', { 'super_hero': super_hero }) }}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-user-astronaut"></i>
+        <p>Aucun héros trouvé. Soyez le premier à en créer un !</p>
+        <a href="{{ path('app_super_hero_new') }}" class="btn">
+            <i class="fas fa-plus"></i> Ajouter un héros
+        </a>
+    </div>
+{% endfor %}

@@ -5,6 +5,70 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/hero.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/filters.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour mettre à jour les filtres actifs
+            function updateActiveFilters() {
+                const activeFilters = document.querySelector('.active-filters');
+                activeFilters.innerHTML = '';
+                
+                const name = document.querySelector('#filter-name').value;
+                const team = document.querySelector('#filter-team').value;
+                const status = document.querySelector('#filter-status').value;
+                const power = document.querySelector('#filter-power').value;
+
+                if (name) {
+                    addFilterTag('Nom: ' + name);
+                }
+                if (team) {
+                    const teamSelect = document.querySelector('#filter-team');
+                    const teamName = teamSelect.options[teamSelect.selectedIndex].text;
+                    addFilterTag('Équipe: ' + teamName);
+                }
+                if (status) {
+                    addFilterTag('Statut: ' + status);
+                }
+                if (power) {
+                    const powerSelect = document.querySelector('#filter-power');
+                    const powerName = powerSelect.options[powerSelect.selectedIndex].text;
+                    addFilterTag('Pouvoir: ' + powerName);
+                }
+            }
+
+            // Fonction pour ajouter un tag de filtre
+            function addFilterTag(text) {
+                const activeFilters = document.querySelector('.active-filters');
+                const tag = document.createElement('span');
+                tag.className = 'filter-tag';
+                tag.innerHTML = `
+                    ${text}
+                    <span class="remove-tag">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                activeFilters.appendChild(tag);
+            }
+
+            // Écouteurs d'événements pour les champs de filtre
+            document.querySelectorAll('.filter-input, .filter-select').forEach(filter => {
+                filter.addEventListener('change', updateActiveFilters);
+            });
+
+            // Réinitialiser les filtres
+            document.querySelector('#reset-filters').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.filter-input, .filter-select').forEach(filter => {
+                    filter.value = '';
+                });
+                updateActiveFilters();
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block body %}
@@ -13,6 +77,63 @@
         <a href="{{ path('app_super_hero_new') }}" class="btn">
             <i class="fas fa-plus"></i> New Hero
         </a>
+    </div>
+
+    <div class="filters-section">
+        <div class="filters-header">
+            <h2 class="filters-title">
+                <i class="fas fa-filter"></i> Filtrer les héros
+            </h2>
+        </div>
+
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label class="filter-label" for="filter-name">Nom du héros</label>
+                <input type="text" id="filter-name" class="filter-input" placeholder="Rechercher par nom...">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="filter-team">Équipe</label>
+                <select id="filter-team" class="filter-select">
+                    <option value="">Toutes les équipes</option>
+                    {% for team in teams|default([]) %}
+                        <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="filter-status">Statut</label>
+                <select id="filter-status" class="filter-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="active">Actif</option>
+                    <option value="inactive">Inactif</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="filter-power">Pouvoir</label>
+                <select id="filter-power" class="filter-select">
+                    <option value="">Tous les pouvoirs</option>
+                    {% for power in powers|default([]) %}
+                        <option value="{{ power.id }}">{{ power.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="active-filters">
+            <!-- Les filtres actifs seront ajoutés ici dynamiquement -->
+        </div>
+
+        <div class="filters-actions">
+            <button id="reset-filters" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Réinitialiser
+            </button>
+            <button id="apply-filters" class="btn">
+                <i class="fas fa-search"></i> Appliquer les filtres
+            </button>
+        </div>
     </div>
 
     <div class="hero-grid">
@@ -63,11 +184,11 @@
                 </div>
             </div>
         {% else %}
-            <div class="card">
-                <i class="fas fa-user-astronaut" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
-                <p style="margin: 0; font-size: 1.2rem; color: #333;">No heroes found. Be the first to create one!</p>
-                <a href="{{ path('app_super_hero_new') }}" class="btn" style="margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-plus"></i> Add Hero
+            <div class="empty-state">
+                <i class="fas fa-user-astronaut"></i>
+                <p>Aucun héros trouvé. Soyez le premier à en créer un !</p>
+                <a href="{{ path('app_super_hero_new') }}" class="btn">
+                    <i class="fas fa-plus"></i> Ajouter un héros
                 </a>
             </div>
         {% endfor %}

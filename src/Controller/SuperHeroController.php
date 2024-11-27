@@ -6,6 +6,7 @@ use App\Entity\SuperHero;
 use App\Form\SuperHeroType;
 use App\Repository\PowerRepository;
 use App\Repository\SuperHeroRepository;
+use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,11 +15,50 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/superhero')]
 final class SuperHeroController extends AbstractController{
-    #[Route(name: 'app_super_hero_index', methods: ['GET'])]
-    public function index(SuperHeroRepository $superHeroRepository): Response
+    #[Route('/', name: 'app_super_hero_index', methods: ['GET'])]
+    public function index(Request $request, SuperHeroRepository $superHeroRepository, TeamRepository $teamRepository, PowerRepository $powerRepository): Response
     {
+        $name = $request->query->get('name');
+        $teamId = $request->query->get('team');
+        $status = $request->query->get('status');
+        $powerId = $request->query->get('power');
+
+        $queryBuilder = $superHeroRepository->createQueryBuilder('sh')
+            ->leftJoin('sh.team', 't')
+            ->leftJoin('sh.powers', 'p');
+
+        if ($name) {
+            $queryBuilder->andWhere('LOWER(sh.name) LIKE LOWER(:name)')
+                ->setParameter('name', '%' . $name . '%');
+        }
+
+        if ($teamId) {
+            $queryBuilder->andWhere('t.id = :teamId')
+                ->setParameter('teamId', $teamId);
+        }
+
+        if ($status) {
+            $queryBuilder->andWhere('sh.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        if ($powerId) {
+            $queryBuilder->andWhere(':powerId MEMBER OF sh.powers')
+                ->setParameter('powerId', $powerId);
+        }
+
+        $superHeroes = $queryBuilder->getQuery()->getResult();
+
+        if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+            return $this->render('super_hero/_hero_grid.html.twig', [
+                'super_heroes' => $superHeroes,
+            ]);
+        }
+
         return $this->render('super_hero/index.html.twig', [
-            'super_heroes' => $superHeroRepository->findAll(),
+            'super_heroes' => $superHeroes,
+            'teams' => $teamRepository->findAll(),
+            'powers' => $powerRepository->findAll(),
         ]);
     }
 
