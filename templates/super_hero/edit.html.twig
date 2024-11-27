@@ -8,9 +8,93 @@
         #model3dPreview {
             width: 100%;
             height: 300px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-            border-radius: 10px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero-form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .page-subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section-title {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .actions-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-color);
+            color: white;
         }
     </style>
 {% endblock %}
@@ -30,7 +114,6 @@
                 if (modelPath) {
                     console.log('Updating preview with model:', modelPath);
                     if (viewer) {
-                        // Nettoyer le viewer existant
                         const container = document.getElementById('model3dPreview');
                         container.innerHTML = '';
                     }
@@ -39,10 +122,7 @@
             }
 
             if (modelSelect) {
-                // Initialiser avec la valeur actuelle
                 updatePreview('{{ asset(form.model3dPath.vars.value) }}');
-
-                // Mettre à jour lors du changement
                 modelSelect.addEventListener('change', function() {
                     updatePreview(this.value);
                 });
@@ -52,68 +132,28 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <!-- Titre et description de la page -->
-            <div class="col-12 text-center mb-4">
-                <h1 class="display-4 text-primary">Modifier votre Super-Héros</h1>
-                <p class="lead text-light">Rafraîchissez les informations de votre héros et mettez à jour ses pouvoirs !</p>
+    <div class="edit-hero-container">
+        <h1 class="page-title">Modifier votre Super-Héros</h1>
+        <p class="page-subtitle">Personnalisez les caractéristiques et les pouvoirs de votre héros</p>
+
+        <div class="hero-form-card">
+            <div class="form-section">
+                <h2 class="form-section-title">Informations du héros</h2>
+                {{ include('super_hero/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
             </div>
 
-            <!-- Formulaire de modification -->
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow-lg border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title">Édition du Super-Héros</h3>
-                    </div>
-                    <div class="card-body">
-                        <!-- Inclusion du formulaire avec un label de bouton adapté -->
-                        {{ include('super_hero/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
-
-                        <!-- Ajouter des pouvoirs au super-héros -->
-                        {# {% if all_powers is defined and all_powers is not empty %}
-                            <div class="mt-4">
-                                <h4 class="text-primary">Ajouter des pouvoirs</h4>
-                                <form method="POST" action="{{ path('super_hero_add_powers', {'id': super_hero.id}) }}">
-                                    <div class="mb-3">
-                                        <label for="powers" class="form-label">Choisir des pouvoirs</label>
-                                        <select name="powers[]" id="powers" class="form-control" multiple>
-                                            {% for power in all_powers %}
-                                                <option value="{{ power.id }}" 
-                                                    {% if all_powers|map(p => p.id)|filter(v => v == power.id)|length > 0 %} selected {% endif %}>
-                                                    {{ power.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-info">Ajouter ces pouvoirs</button>
-                                </form>
-                            </div>
-                        {% else %}
-                            <p class="text-danger">Aucun pouvoir disponible. Ajoutez des pouvoirs dans la base de données pour les associer à ce super-héros.</p>
-                        {% endif %} #}
-                    </div>
-
-                    <!-- Bouton retour à la liste -->
-                    <div class="card-footer text-center">
-                        <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-left-circle"></i> Retour à la liste des super-héros
-                        </a>
-                    </div>
-                </div>
+            <div class="form-section">
+                <h2 class="form-section-title">Prévisualisation 3D</h2>
+                <div id="model3dPreview"></div>
             </div>
-        </div>
 
-        <!-- Formulaire de suppression de super-héros -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-8 col-lg-6">
-                <div class="card border-danger">
-                    <div class="card-body text-center">
-                        <h4 class="text-danger">Supprimer ce Super-Héros</h4>
-                        <p class="text-muted">Cette action est irréversible !</p>
-                        {{ include('super_hero/_delete_form.html.twig') }}
-                    </div>
-                </div>
+            <div class="actions-container">
+                <a href="{{ path('app_super_hero_index') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à la liste
+                </a>
+                
+                {{ include('super_hero/_delete_form.html.twig') }}
             </div>
         </div>
     </div>
