@@ -21,31 +21,33 @@ class EnergyRechargeService
             return $hero->getEnergy();
         }
 
-        // Calculer le temps écoulé depuis la dernière mission
-        $lastMission = $hero->getLastMission();
-        if ($lastMission) {
-            $lastMissionEnd = $lastMission->getCompletedAt() ?? $lastMission->getStartedAt();
-            if ($lastMissionEnd) {
-                $minutesElapsed = (time() - $lastMissionEnd->getTimestamp()) / 60;
-                
-                // Calculer la nouvelle énergie
-                $energyGained = $minutesElapsed * self::RECHARGE_RATE;
-                $newEnergy = min(self::MAX_ENERGY, $hero->getEnergy() + $energyGained);
-                
-                // Mettre à jour l'énergie du héros
-                $hero->setEnergy($newEnergy);
-                $this->entityManager->persist($hero);
-                $this->entityManager->flush();
-                
-                return $newEnergy;
-            }
+        // Si l'énergie n'est pas définie, l'initialiser à 100
+        if ($hero->getEnergy() === null) {
+            $hero->setEnergy(self::MAX_ENERGY);
+            $this->entityManager->persist($hero);
+            $this->entityManager->flush();
+            return self::MAX_ENERGY;
         }
 
-        // Si pas de dernière mission, remettre à 100%
-        $hero->setEnergy(self::MAX_ENERGY);
-        $this->entityManager->persist($hero);
-        $this->entityManager->flush();
-        
-        return self::MAX_ENERGY;
+        // Calculer le temps écoulé depuis la dernière mission
+        $lastMission = $hero->getLastMission();
+        if ($lastMission && ($lastMission->getCompletedAt() || $lastMission->getStartedAt())) {
+            $lastMissionEnd = $lastMission->getCompletedAt() ?? $lastMission->getStartedAt();
+            $minutesElapsed = (time() - $lastMissionEnd->getTimestamp()) / 60;
+            
+            // Calculer la nouvelle énergie
+            $energyGained = $minutesElapsed * self::RECHARGE_RATE;
+            $newEnergy = min(self::MAX_ENERGY, $hero->getEnergy() + $energyGained);
+            
+            // Mettre à jour l'énergie du héros
+            $hero->setEnergy($newEnergy);
+            $this->entityManager->persist($hero);
+            $this->entityManager->flush();
+            
+            return $newEnergy;
+        }
+
+        // Si pas de dernière mission, garder l'énergie actuelle
+        return $hero->getEnergy();
     }
 }

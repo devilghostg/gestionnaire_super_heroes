@@ -146,7 +146,13 @@ class MissionController extends AbstractController
             return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
         }
 
-        $mission->setSuperHero($hero);
+        // Créer une nouvelle assignation
+        $assignment = new MissionAssignment();
+        $assignment->setMission($mission)
+                  ->setHero($hero)
+                  ->setIsActive(true);
+
+        $entityManager->persist($assignment);
         $mission->setStatus('in_progress');
         $mission->setStartedAt(new \DateTimeImmutable());
         
@@ -286,13 +292,27 @@ class MissionController extends AbstractController
             $startTime = $mission->getStartedAt();
             $timeLimit = $mission->getTimeLimit();
             $elapsedTime = time() - $startTime->getTimestamp();
-            $timeRatio = max(0, min(1, ($timeLimit - $elapsedTime) / $timeLimit));
-            $score = round($timeRatio * 100);
             
+            // Score basé sur le temps (40% du score total)
+            $timeRatio = max(0, min(1, ($timeLimit - $elapsedTime) / $timeLimit));
+            $timeScore = $timeRatio * 40;
+            
+            // Score basé sur l'énergie restante (30% du score total)
+            $hero = $mission->getSuperHero();
+            $energyScore = 0;
+            if ($hero) {
+                $energyRatio = $hero->getEnergy() / 100;
+                $energyScore = $energyRatio * 30;
+            }
+            
+            // Score basé sur la difficulté (30% du score total)
+            $difficultyScore = (6 - $mission->getDifficulty()) * 6; // Plus la difficulté est élevée, plus le score est haut
+            
+            // Score final
+            $score = round($timeScore + $energyScore + $difficultyScore);
             $mission->setScore($score);
             
             // Mettre à jour la dernière mission du héros
-            $hero = $mission->getSuperHero();
             if ($hero) {
                 $hero->setLastMission($mission);
                 $entityManager->persist($hero);
@@ -305,6 +325,9 @@ class MissionController extends AbstractController
                 'success' => true,
                 'message' => 'Mission terminée avec succès !',
                 'score' => $score,
+                'timeScore' => round($timeScore),
+                'energyScore' => round($energyScore),
+                'difficultyScore' => round($difficultyScore),
                 'redirect' => $this->generateUrl('app_mission_show', ['id' => $mission->getId()])
             ]);
         }
@@ -347,189 +370,10 @@ class MissionController extends AbstractController
         return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
     }
 
-    #[Route('/{id}/delete', name: 'app_mission_delete', methods: ['POST'])]
+    #[Route('/{id}/remove', name: 'app_mission_remove', methods: ['POST'])]
     public function delete(
         Request $request,
         Mission $mission,
-        EntityManagerInterface $entityManager
-    ): Response {
-        if ($this->isCsrfTokenValid('delete'.$mission->getId(), $request->request->get('_token'))) {
-            try {
-                // Trouver tous les héros qui ont cette mission comme dernière mission
-                $heroes = $entityManager->getRepository(SuperHero::class)->findBy(['lastMission' => $mission]);
-                
-                // Désassocier la mission de tous ces héros
-                foreach ($heroes as $hero) {
-                    $hero->setLastMission(null);
-                    $entityManager->persist($hero);
-                }
-                
-                // Désassocier le héros de la mission
-                if ($mission->getSuperHero()) {
-                    $hero = $mission->getSuperHero();
-                    $mission->setSuperHero(null);
-                    $entityManager->persist($mission);
-                }
-                
-                // Supprimer la mission
-                $entityManager->remove($mission);
-                $entityManager->flush();
-                
-                $this->addFlash('success', 'Mission supprimée avec succès');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors de la suppression de la mission : ' . $e->getMessage());
-            }
-        }
-
-        return $this->redirectToRoute('app_mission_index');
-    }
-
-    #[Route('/cleanup-cancelled', name: 'app_mission_cleanup', methods: ['GET'])]
-    public function cleanupCancelledMissions(EntityManagerInterface $entityManager, MissionRepository $missionRepository): Response
-    {
-        $now = new \DateTimeImmutable();
-        $deletedCount = 0;
-
-        // Récupérer toutes les missions annulées
-        $cancelledMissions = $missionRepository->findBy(['status' => 'cancelled']);
-
-        foreach ($cancelledMissions as $mission) {
-            if ($mission->getCancelledAt()) {
-                $deleteDelay = min(2 + ($mission->getDifficulty() - 1), 5) * 60; // En secondes
-                $deleteTime = $mission->getCancelledAt()->modify("+{$deleteDelay} seconds");
-
-                if ($now >= $deleteTime) {
-                    $entityManager->remove($mission);
-                    $deletedCount++;
-                }
-            }
-        }
-
-        if ($deletedCount > 0) {
-            $entityManager->flush();
-            $this->addFlash('success', sprintf('%d mission(s) supprimée(s) avec succès.', $deletedCount));
-        } else {
-            $this->addFlash('info', 'Aucune mission à supprimer pour le moment.');
-        }
-
-        return $this->redirectToRoute('app_mission_index');
-    }
-
-    #[Route('/{id}/assign-heroes', name: 'app_mission_assign_heroes', methods: ['GET'])]
-    public function assignHeroes(Mission $mission, SuperHeroRepository $heroRepository): Response
-    {
-        // Récupérer tous les héros disponibles (pas en mission)
-        $availableHeroes = $heroRepository->findAvailableHeroes();
-        
-        return $this->render('mission/assign_heroes.html.twig', [
-            'mission' => $mission,
-            'available_heroes' => $availableHeroes
-        ]);
-    }
-
-    #[Route('/{id}/assign-team', name: 'app_mission_assign_team', methods: ['GET'])]
-    public function assignTeam(Mission $mission, TeamRepository $teamRepository): Response
-    {
-        // Récupérer les équipes disponibles (dont les héros ne sont pas en mission)
-        $availableTeams = $teamRepository->findAvailableTeams();
-        
-        return $this->render('mission/assign_team.html.twig', [
-            'mission' => $mission,
-            'available_teams' => $availableTeams
-        ]);
-    }
-
-    #[Route('/{id}/add-hero/{heroId}', name: 'app_mission_add_hero', methods: ['POST'])]
-    public function addHeroToMission(
-        Mission $mission,
-        SuperHero $hero,
-        EntityManagerInterface $entityManager
-    ): JsonResponse {
-        // Vérifier si le héros est disponible
-        if (!$hero->isAvailableForMission()) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Ce héros est déjà en mission'
-            ], 400);
-        }
-
-        // Créer une nouvelle assignation
-        $assignment = new MissionAssignment();
-        $assignment->setMission($mission)
-                  ->setHero($hero)
-                  ->setIsActive(true);
-
-        $entityManager->persist($assignment);
-        $entityManager->flush();
-
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Héros ajouté à la mission avec succès'
-        ]);
-    }
-
-    #[Route('/{id}/add-team/{teamId}', name: 'app_mission_add_team', methods: ['POST'])]
-    public function addTeamToMission(
-        Mission $mission,
-        Team $team,
-        EntityManagerInterface $entityManager
-    ): JsonResponse {
-        // Vérifier si tous les héros de l'équipe sont disponibles
-        foreach ($team->getMembers() as $hero) {
-            if (!$hero->isAvailableForMission()) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Certains héros de l\'équipe sont déjà en mission'
-                ], 400);
-            }
-        }
-
-        // Assigner tous les héros de l'équipe
-        foreach ($team->getMembers() as $hero) {
-            $assignment = new MissionAssignment();
-            $assignment->setMission($mission)
-                      ->setHero($hero)
-                      ->setIsActive(true);
-            $entityManager->persist($assignment);
-        }
-
-        $entityManager->flush();
-
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Équipe assignée à la mission avec succès'
-        ]);
-    }
-
-    #[Route('/{id}/remove-hero/{heroId}', name: 'app_mission_remove_hero', methods: ['POST'])]
-    public function removeHeroFromMission(
-        Mission $mission,
-        SuperHero $hero,
-        EntityManagerInterface $entityManager
-    ): JsonResponse {
-        $assignment = $entityManager->getRepository(MissionAssignment::class)
-            ->findOneBy(['mission' => $mission, 'hero' => $hero, 'isActive' => true]);
-
-        if (!$assignment) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Ce héros n\'est pas assigné à cette mission'
-            ], 404);
-        }
-
-        $assignment->setIsActive(false);
-        $entityManager->flush();
-
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Héros retiré de la mission avec succès'
-        ]);
-    }
-
-    #[Route('/{id}/delete', name: 'app_mission_delete', methods: ['POST'])]
-    public function deleteMission(
-        Request $request, 
-        Mission $mission, 
         EntityManagerInterface $entityManager,
         MissionRepository $missionRepository,
         MissionHistoryRepository $missionHistoryRepository
@@ -579,31 +423,25 @@ class MissionController extends AbstractController
         $missionHistory->setStatus($mission->getStatus());
         $missionHistory->setDeletedAt(new \DateTimeImmutable());
         
-        if ($mission->getSuperHero()) {
-            $missionHistory->setHeroName($mission->getSuperHero()->getName());
+        // Sauvegarder les noms des héros assignés
+        $heroNames = [];
+        foreach ($mission->getAssignments() as $assignment) {
+            if ($assignment->isActive()) {
+                $heroNames[] = $assignment->getHero()->getName();
+            }
         }
+        $missionHistory->setHeroName(implode(', ', $heroNames));
         
         // Sauvegarder l'historique
         $entityManager->persist($missionHistory);
         
         // Nettoyer les relations
-        $heroes = $entityManager->getRepository(SuperHero::class)->findBy(['lastMission' => $mission]);
-        foreach ($heroes as $hero) {
-            $hero->setLastMission(null);
-            $entityManager->persist($hero);
-        }
-        
-        // Désassocier le héros de la mission
-        if ($mission->getSuperHero()) {
-            $hero = $mission->getSuperHero();
-            $mission->setSuperHero(null);
-            $entityManager->persist($mission);
+        foreach ($mission->getAssignments() as $assignment) {
+            $entityManager->remove($assignment);
         }
         
         // Supprimer la mission
         $entityManager->remove($mission);
-        
-        // Sauvegarder tous les changements
         $entityManager->flush();
     }
 
