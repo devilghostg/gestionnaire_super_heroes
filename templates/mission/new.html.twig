@@ -2,6 +2,11 @@
 
 {% block title %}Nouvelle mission{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/pages/mission/new.css') }}">
+{% endblock %}
+
 {% block body %}
     <div class="container mt-4">
         <div class="card action-card">

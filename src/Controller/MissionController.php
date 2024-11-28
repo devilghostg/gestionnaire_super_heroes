@@ -199,11 +199,10 @@ class MissionController extends AbstractController
 
         // Mettre à jour l'énergie des héros
         foreach ($mission->getActiveAssignments() as $assignment) {
-            $hero = $assignment->getHero();
             $energyLoss = 0.5; // Perte d'énergie progressive
-            $newEnergy = max(0, $hero->getEnergy() - $energyLoss);
-            $hero->setEnergy($newEnergy);
-            $entityManager->persist($hero);
+            $newEnergy = max(0, $assignment->getEnergy() - $energyLoss);
+            $assignment->setEnergy($newEnergy);
+            $entityManager->persist($assignment);
         }
 
         // Générer des logs de mission
@@ -221,7 +220,7 @@ class MissionController extends AbstractController
 
         $heroEnergies = [];
         foreach ($mission->getActiveAssignments() as $assignment) {
-            $heroEnergies[$assignment->getHero()->getId()] = $assignment->getHero()->getEnergy();
+            $heroEnergies[$assignment->getHero()->getId()] = $assignment->getEnergy();
         }
 
         return new JsonResponse([
@@ -233,66 +232,50 @@ class MissionController extends AbstractController
     }
 
     #[Route('/{id}/complete', name: 'app_mission_complete', methods: ['POST'])]
-    public function complete(
-        Request $request, 
-        Mission $mission, 
-        EntityManagerInterface $entityManager
-    ): JsonResponse {
-        if ($this->isCsrfTokenValid('complete'.$mission->getId(), $request->request->get('_token'))) {
-            $mission->setStatus('completed');
-            $mission->setCompletedAt(new \DateTime());
-            
-            // Calculer le score final
-            $startTime = $mission->getStartedAt();
-            $timeLimit = $mission->getTimeLimit();
-            $elapsedTime = time() - $startTime->getTimestamp();
-            
-            // Score basé sur le temps (40% du score total)
-            $timeRatio = max(0, min(1, ($timeLimit - $elapsedTime) / $timeLimit));
-            $timeScore = $timeRatio * 40;
-            
-            // Score basé sur l'énergie restante (30% du score total)
-            $energyScore = 0;
-            if (!$mission->getActiveAssignments()->isEmpty()) {
-                $totalEnergy = 0;
-                foreach ($mission->getActiveAssignments() as $assignment) {
-                    $totalEnergy += $assignment->getHero()->getEnergy();
-                }
-                $averageEnergy = $totalEnergy / $mission->getActiveAssignments()->count();
-                $energyRatio = $averageEnergy / 100;
-                $energyScore = $energyRatio * 30;
-            }
-            
-            // Score basé sur la difficulté (30% du score total)
-            $difficultyScore = (6 - $mission->getDifficulty()) * 6;
-            
-            // Score final
-            $score = round($timeScore + $energyScore + $difficultyScore);
-            $mission->setScore($score);
-            
-            // Mettre à jour le statut des assignations
-            foreach ($mission->getActiveAssignments() as $assignment) {
-                $assignment->setIsActive(false);
-            }
-            
-            $entityManager->persist($mission);
-            $entityManager->flush();
-
-            return new JsonResponse([
-                'success' => true,
-                'message' => 'Mission terminée avec succès !',
-                'score' => $score,
-                'timeScore' => round($timeScore),
-                'energyScore' => round($energyScore),
-                'difficultyScore' => round($difficultyScore),
-                'redirect' => $this->generateUrl('app_mission_show', ['id' => $mission->getId()])
-            ]);
+    public function completeMission(
+        Mission $mission,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        MissionHistoryRepository $historyRepository
+    ): Response {
+        if (!$this->isCsrfTokenValid('complete'.$mission->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
         }
 
-        return new JsonResponse([
-            'success' => false,
-            'message' => 'Token CSRF invalide'
-        ], 400);
+        if ($mission->getStatus() !== 'in_progress') {
+            $this->addFlash('error', 'Cette mission ne peut pas être terminée');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        // Créer un historique de la mission
+        $history = new MissionHistory();
+        $history->setTitle($mission->getTitle());
+        $history->setDescription($mission->getDescription());
+        $history->setDifficulty($mission->getDifficulty());
+        $history->setResult($mission->getResult());
+        $history->setStatus('completed');
+        $history->setDeletedAt(new \DateTimeImmutable());
+        
+        // Ajouter les héros qui ont participé
+        foreach ($mission->getActiveAssignments() as $assignment) {
+            $history->addHero($assignment->getHero());
+            
+            // Recharger l'énergie du héros
+            $hero = $assignment->getHero();
+            $hero->setEnergy(100);
+            $entityManager->persist($hero);
+        }
+
+        // Sauvegarder l'historique
+        $entityManager->persist($history);
+
+        // Supprimer la mission
+        $entityManager->remove($mission);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Mission terminée avec succès ! Les héros peuvent maintenant se reposer.');
+        return $this->redirectToRoute('app_mission_index');
     }
 
     #[Route('/{id}/cancel', name: 'app_mission_cancel', methods: ['POST'])]

@@ -4,36 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        .mission-log {
-            height: 300px;
-            overflow-y: auto;
-            background: #1a1a1a;
-            color: #00ff00;
-            font-family: monospace;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-        }
-        .mission-log p {
-            margin: 0;
-            padding: 2px 0;
-        }
-        .energy-bar {
-            margin-top: 10px;
-        }
-        .energy-bar .progress {
-            height: 25px;
-        }
-        .hero-card {
-            background: rgba(0,0,0,0.05);
-            padding: 1rem;
-            border-radius: 5px;
-        }
-        .hero-info {
-            margin-bottom: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/pages/mission/progress.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -80,30 +51,32 @@
                     <div class="col-md-4">
                         <!-- Informations du héros -->
                         <div class="hero-section">
-                            <h4>Héros assigné</h4>
-                            {% if mission.superHero %}
-                                <div class="hero-card">
-                                    <div class="hero-info">
-                                        <h5>{{ mission.superHero.name }}</h5>
-                                        <p class="text-muted mb-2">{{ mission.superHero.alias }}</p>
-                                    </div>
-                                    
-                                    <div class="energy-section">
-                                        <h6>Niveau d'énergie</h6>
-                                        <div class="energy-bar">
-                                            <div class="progress">
-                                                <div class="progress-bar {% if mission.superHero.energy < 20 %}bg-danger{% elseif mission.superHero.energy < 50 %}bg-warning{% else %}bg-success{% endif %}" 
-                                                     role="progressbar" 
-                                                     style="width: {{ mission.superHero.energy }}%"
-                                                     aria-valuenow="{{ mission.superHero.energy }}" 
-                                                     aria-valuemin="0" 
-                                                     aria-valuemax="100">
-                                                    {{ mission.superHero.energy }}%
+                            <h4>Héros assignés</h4>
+                            {% if mission.activeAssignments|length > 0 %}
+                                {% for assignment in mission.activeAssignments %}
+                                    <div class="hero-card" data-hero-id="{{ assignment.hero.id }}">
+                                        <div class="hero-info">
+                                            <h5 class="mb-1">{{ assignment.hero.name }}</h5>
+                                            <p class="text-muted mb-2">{{ assignment.hero.alias }}</p>
+                                        </div>
+                                        
+                                        <div class="energy-section">
+                                            <h6 class="mb-2">Niveau d'énergie</h6>
+                                            <div class="energy-bar">
+                                                <div class="progress">
+                                                    <div class="progress-bar {% if assignment.energy < 20 %}bg-danger{% elseif assignment.energy < 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                         role="progressbar" 
+                                                         style="width: {{ assignment.energy }}%"
+                                                         aria-valuenow="{{ assignment.energy }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                        {{ assignment.energy|number_format(1) }}%
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                {% endfor %}
                             {% else %}
                                 <p class="text-muted">Aucun héros assigné</p>
                             {% endif %}
@@ -111,17 +84,18 @@
 
                         <!-- Actions -->
                         <div class="mission-actions mt-4">
-                            <form id="missionForm" method="post" class="d-grid gap-2">
+                            <form id="missionForm" method="post" action="{{ path('app_mission_complete', {'id': mission.id}) }}" class="d-grid gap-2">
                                 <input type="hidden" name="_token" value="{{ csrf_token('complete' ~ mission.id) }}">
                                 <button type="submit" class="btn btn-success" {% if mission.progress < 100 %}disabled{% endif %}>
                                     <i class="bi bi-check-circle"></i> Terminer la mission
                                 </button>
-                                
-                                <a href="{{ path('app_mission_cancel', {'id': mission.id}) }}" 
-                                   class="btn btn-danger"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?')">
+                            </form>
+                            
+                            <form method="post" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" class="d-grid gap-2 mt-2" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
+                                <button type="submit" class="btn btn-danger">
                                     <i class="bi bi-x-circle"></i> Annuler la mission
-                                </a>
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -137,130 +111,98 @@
         const completeButton = document.querySelector('#missionForm button');
         const missionTimer = document.getElementById('missionTimer');
         const missionLog = document.getElementById('missionLog');
-        const missionForm = document.getElementById('missionForm');
-        const startTime = new Date('{{ mission.startedAt|date('c') }}').getTime();
-        const timeLimit = {{ mission.timeLimit }} * 1000; // Convertir en millisecondes
 
-        // Gérer la soumission du formulaire de complétion
-        missionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (progress >= 100) {
-                const formData = new FormData(missionForm);
+        // Fonction pour mettre à jour l'énergie d'un héros
+        function updateHeroEnergy(heroId, energy) {
+            const energyBar = document.querySelector(`[data-hero-id="${heroId}"] .progress-bar`);
+            if (energyBar) {
+                energyBar.style.width = `${energy}%`;
+                energyBar.setAttribute('aria-valuenow', energy);
+                energyBar.textContent = `${energy.toFixed(1)}%`;
                 
-                fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        appendToLog(['Mission terminée avec succès ! Score final : ' + data.score + '/100']);
-                        setTimeout(() => {
-                            window.location.href = data.redirect;
-                        }, 2000);
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Une erreur est survenue lors de la complétion de la mission');
-                });
-            }
-        });
-        
-        function updateTimer() {
-            const now = new Date().getTime();
-            const elapsed = now - startTime;
-            const remaining = timeLimit - elapsed;
-            
-            if (remaining <= 0) {
-                missionTimer.textContent = "Temps écoulé !";
-                missionTimer.classList.remove('bg-primary');
-                missionTimer.classList.add('bg-danger');
-                return;
-            }
-            
-            const minutes = Math.floor(remaining / 60000);
-            const seconds = Math.floor((remaining % 60000) / 1000);
-            missionTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function appendToLog(messages) {
-            messages.forEach(message => {
-                const now = new Date().toLocaleTimeString();
-                const p = document.createElement('p');
-                p.textContent = `[${now}] ${message}`;
-                missionLog.appendChild(p);
-            });
-            missionLog.scrollTop = missionLog.scrollHeight;
-        }
-
-        function updateProgress() {
-            if (progress < 100) {
-                progress += 1;
-                progressBar.style.width = progress + '%';
-                progressBar.setAttribute('aria-valuenow', progress);
-                progressBar.textContent = progress + '%';
-
-                if (progress >= 100) {
-                    completeButton.disabled = false;
+                // Mettre à jour les classes de couleur
+                energyBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                if (energy < 20) {
+                    energyBar.classList.add('bg-danger');
+                } else if (energy < 50) {
+                    energyBar.classList.add('bg-warning');
+                } else {
+                    energyBar.classList.add('bg-success');
                 }
-
-                fetch('{{ path('app_mission_update_progress', {'id': mission.id}) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        progress: progress
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.heroEnergy !== null) {
-                        const energyBar = document.querySelector('.energy-bar .progress-bar');
-                        if (energyBar) {
-                            energyBar.style.width = data.heroEnergy + '%';
-                            energyBar.textContent = Math.round(data.heroEnergy) + '%';
-                            
-                            // Mettre à jour la classe de la barre d'énergie
-                            energyBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
-                            if (data.heroEnergy < 20) {
-                                energyBar.classList.add('bg-danger');
-                            } else if (data.heroEnergy < 50) {
-                                energyBar.classList.add('bg-warning');
-                            } else {
-                                energyBar.classList.add('bg-success');
-                            }
-                        }
-                    }
-                    
-                    if (data.logs && data.logs.length > 0) {
-                        appendToLog(data.logs);
-                    }
-                });
             }
+        }
+
+        // Fonction pour mettre à jour la progression
+        function updateProgress() {
+            fetch('{{ path('app_mission_update_progress', {'id': mission.id}) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    progress: progress
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mettre à jour l'énergie des héros
+                    Object.entries(data.heroEnergies).forEach(([heroId, energy]) => {
+                        updateHeroEnergy(heroId, energy);
+                    });
+
+                    // Ajouter les nouveaux logs
+                    if (data.logs && data.logs.length > 0) {
+                        data.logs.forEach(log => {
+                            const logEntry = document.createElement('p');
+                            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${log}`;
+                            missionLog.appendChild(logEntry);
+                            missionLog.scrollTop = missionLog.scrollHeight;
+                        });
+                    }
+
+                    progress = Math.min(100, progress + 1);
+                    progressBar.style.width = `${progress}%`;
+                    progressBar.setAttribute('aria-valuenow', progress);
+                    progressBar.textContent = `${progress}%`;
+
+                    if (progress >= 100) {
+                        completeButton.disabled = false;
+                        clearInterval(progressInterval);
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         // Mettre à jour la progression toutes les 2 secondes
         const progressInterval = setInterval(() => {
             if (progress < 100) {
                 updateProgress();
-            } else {
-                clearInterval(progressInterval);
             }
         }, 2000);
 
-        // Mettre à jour le timer chaque seconde
-        const timerInterval = setInterval(updateTimer, 1000);
+        // Timer de la mission
+        const startTime = {{ mission.startedAt|date('U') }};
+        const timeLimit = {{ mission.timeLimit }};
 
-        // Nettoyage des intervalles quand la page est fermée
-        window.addEventListener('beforeunload', () => {
-            clearInterval(progressInterval);
-            clearInterval(timerInterval);
-        });
+        function updateTimer() {
+            const now = Math.floor(Date.now() / 1000);
+            const elapsed = now - startTime;
+            const remaining = Math.max(0, timeLimit - elapsed);
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            
+            missionTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+            }
+        }
+
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
     });
     </script>
 {% endblock %}

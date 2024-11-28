@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MissionHistoryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MissionHistoryRepository::class)]
@@ -37,9 +39,13 @@ class MissionHistory
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $result = null;
 
+    #[ORM\ManyToMany(targetEntity: SuperHero::class)]
+    private Collection $heroes;
+
     public function __construct()
     {
         $this->deletedAt = new \DateTimeImmutable();
+        $this->heroes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -132,6 +138,25 @@ class MissionHistory
     public function setResult(?string $result): static
     {
         $this->result = $result;
+        return $this;
+    }
+
+    public function getHeroes(): Collection
+    {
+        return $this->heroes;
+    }
+
+    public function addHero(SuperHero $hero): self
+    {
+        if (!$this->heroes->contains($hero)) {
+            $this->heroes->add($hero);
+        }
+        return $this;
+    }
+
+    public function removeHero(SuperHero $hero): self
+    {
+        $this->heroes->removeElement($hero);
         return $this;
     }
 }

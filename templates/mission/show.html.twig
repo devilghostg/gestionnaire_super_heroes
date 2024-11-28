@@ -101,6 +101,15 @@
                         <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn" style="width: 100%; background: #FF9800;">
                             <i class="fas fa-tasks"></i> Mettre à jour la progression
                         </a>
+
+                        {% if mission.status == 'in_progress' %}
+                            <form method="post" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');" style="width: 100%;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
+                                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                                    <i class="fas fa-times"></i> Annuler la mission
+                                </button>
+                            </form>
+                        {% endif %}
                     {% endif %}
 
                     {% if mission.status == 'completed' or mission.status == 'cancelled' %}

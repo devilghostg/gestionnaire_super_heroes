@@ -1,0 +1,41 @@
+.random-mission-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, #6C63FF, #FF6584);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.random-mission-subtitle {
+    font-size: 1.8rem;
+    color: #a8b2d1;
+    margin-bottom: 3rem;
+    font-weight: 300;
+}
+
+.create-random-mission-btn {
+    background: linear-gradient(45deg, #6C63FF, #845EF7);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.create-random-mission-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+}
+
+.create-random-mission-btn i {
+    font-size: 1.4rem;
+}

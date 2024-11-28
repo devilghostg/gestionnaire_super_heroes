@@ -154,10 +154,10 @@
 }
 
 .hero-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: rgba(0,0,0,0.05);
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
 }
 
 .hero-card h4 {
@@ -694,4 +694,63 @@
     .mission-btn {
         width: 100%;
     }
+}
+
+.mission-log {
+    height: 300px;
+    overflow-y: auto;
+    background: #1a1a1a;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.mission-log p {
+    margin: 0;
+    padding: 2px 0;
+}
+
+.energy-bar {
+    margin-top: 10px;
+    padding: 0 10px;
+}
+
+.energy-bar .progress {
+    height: 25px;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.energy-bar .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+    font-size: 0.9rem;
+    transition: width 0.3s ease;
+    padding: 0 8px;
+    min-width: 40px; /* Pour toujours voir le pourcentage même à faible énergie */
+}
+
+.hero-info {
+    margin-bottom: 1rem;
+}
+
+/* Couleurs des barres d'énergie */
+.progress-bar.bg-success {
+    background-color: #28a745;
+}
+
+.progress-bar.bg-warning {
+    background-color: #ffc107;
+    color: #000; /* Texte noir pour meilleure visibilité sur fond jaune */
+}
+
+.progress-bar.bg-danger {
+    background-color: #dc3545;
 }

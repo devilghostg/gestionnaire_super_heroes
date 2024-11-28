@@ -4,44 +4,27 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/mission.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pages/mission/random.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="random-mission-card">
-        <h1>Créer une Mission Aléatoire</h1>
-        <p class="mission-intro">Choisissez la difficulté de votre mission et laissez le hasard faire le reste !</p>
+<div class="container mt-5">
+    <h1 class="random-mission-title">Ou créez une mission aléatoire !</h1>
+    <p class="random-mission-subtitle">Laissez le hasard décider de votre prochaine mission.</p>
 
-        <form method="post" class="difficulty-form">
-            <input type="hidden" name="_token" value="{{ csrf_token('random_mission') }}">
-            
-            <div class="difficulty-options">
-                <button type="submit" name="difficulty" value="easy" class="difficulty-btn easy">
-                    <i class="fas fa-star"></i>
-                    <span>Facile</span>
-                    <small>Pour les héros débutants</small>
-                </button>
-
-                <button type="submit" name="difficulty" value="medium" class="difficulty-btn medium">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    <span>Moyenne</span>
-                    <small>Pour les héros expérimentés</small>
-                </button>
-
-                <button type="submit" name="difficulty" value="hard" class="difficulty-btn hard">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    <span>Difficile</span>
-                    <small>Pour les héros d'élite</small>
-                </button>
-            </div>
-        </form>
-
-        <div class="back-link">
-            <a href="{{ path('app_mission_index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Retour à la liste
-            </a>
-        </div>
-    </div>
+    <form method="post" class="d-grid gap-2">
+        <input type="hidden" name="_token" value="{{ csrf_token('random_mission') }}">
+        <select name="difficulty" class="form-select mb-3">
+            <option value="1">Très Facile</option>
+            <option value="2">Facile</option>
+            <option value="3">Moyenne</option>
+            <option value="4">Difficile</option>
+            <option value="5">Très Difficile</option>
+        </select>
+        <button type="submit" class="create-random-mission-btn">
+            <i class="fas fa-random"></i>
+            Créer une Mission Aléatoire
+        </button>
+    </form>
 </div>
 {% endblock %}
