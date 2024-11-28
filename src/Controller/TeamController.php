@@ -16,12 +16,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class TeamController extends AbstractController
 {
     #[Route('/', name: 'app_team_index', methods: ['GET'])]
-    public function index(TeamRepository $teamRepository): Response
+    public function index(Request $request, TeamRepository $teamRepository): Response
     {
-        $teams = $teamRepository->findAll();
+        $search = $request->query->get('search');
+        $filters = [
+            'hasMembers' => $request->query->getBoolean('hasMembers'),
+            'isEmpty' => $request->query->getBoolean('isEmpty')
+        ];
+
+        $teams = $search 
+            ? $teamRepository->findBySearch($search)
+            : $teamRepository->findWithFilters($filters);
 
         return $this->render('team/index.html.twig', [
             'teams' => $teams,
+            'search' => $search,
+            'filters' => $filters,
         ]);
     }
 

@@ -1,0 +1,37 @@
+{% extends 'modal_base.html.twig' %}
+
+{% block body %}
+<div class="hero-detail">
+    <div class="hero-detail-header">
+        <h3>{{ super_hero.name }}</h3>
+        {% if super_hero.isActive %}
+            <span class="badge badge-success">Actif</span>
+        {% else %}
+            <span class="badge badge-danger">Inactif</span>
+        {% endif %}
+    </div>
+
+    <div class="hero-detail-info">
+        <div class="info-group">
+            <span class="info-label">Équipe :</span>
+            <span>{{ super_hero.team }}</span>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">Pouvoirs :</span>
+            <div class="power-list">
+                {% for power in super_hero.powers %}
+                    <span class="power-badge">{{ power.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if super_hero.description %}
+            <div class="info-group">
+                <span class="info-label">Description :</span>
+                <p>{{ super_hero.description }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

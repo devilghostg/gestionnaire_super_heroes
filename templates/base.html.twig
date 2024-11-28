@@ -7,6 +7,8 @@
         {% block stylesheets %}
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css">
         <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
         <link rel="stylesheet" href="{{ asset('css/base.css') }}">
         <link rel="stylesheet" href="{{ asset('css/space-background.css') }}">
@@ -15,11 +17,68 @@
         <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
         <link rel="stylesheet" href="{{ asset('css/flash-messages.css') }}">
         <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+        <style>
+            /* Bouton Retour en haut */
+            #back-to-top {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background-color: var(--primary-color);
+                color: white;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                opacity: 0;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                z-index: 1000;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            #back-to-top:hover {
+                transform: scale(1.1);
+                background-color: var(--secondary-color);
+            }
+
+            #back-to-top.show {
+                opacity: 1;
+            }
+        </style>
         {% endblock %}
 
         {% block javascripts %}
         <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="{{ asset('js/filters.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const backToTopButton = document.createElement('div');
+                backToTopButton.id = 'back-to-top';
+                backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                document.body.appendChild(backToTopButton);
+
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTopButton.classList.add('show');
+                    } else {
+                        backToTopButton.classList.remove('show');
+                    }
+                });
+
+                backToTopButton.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        </script>
         {% endblock %}
     </head>
     <body>
@@ -32,7 +91,7 @@
 
         <nav class="navbar">
             <div class="container">
-                <a class="navbar-brand" href="{{ path('app_super_hero_index') }}">⚡️ Super Heroes</a>
+                <a class="navbar-brand" href="{{ path('app_super_hero_index') }}"> Super Heroes</a>
                 <ul class="navbar-nav">
                     <li><a class="nav-link" href="{{ path('app_super_hero_index') }}"><i class="fas fa-mask"></i> Heroes</a></li>
                     <li><a class="nav-link" href="{{ path('app_team_index') }}"><i class="fas fa-users"></i> Teams</a></li>

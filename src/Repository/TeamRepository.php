@@ -40,4 +40,39 @@ class TeamRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findBySearch(?string $search = null): array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->select('t', 'h')
+            ->leftJoin('t.superHeroes', 'h');
+
+        if ($search) {
+            $qb->andWhere('t.name LIKE :search OR t.description LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('t.name', 'ASC')
+                 ->getQuery()
+                 ->getResult();
+    }
+
+    public function findWithFilters(array $filters = []): array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->select('t', 'h')
+            ->leftJoin('t.superHeroes', 'h');
+
+        if (isset($filters['hasMembers']) && $filters['hasMembers'] === true) {
+            $qb->andWhere('h.id IS NOT NULL');
+        }
+
+        if (isset($filters['isEmpty']) && $filters['isEmpty'] === true) {
+            $qb->andWhere('h.id IS NULL');
+        }
+
+        return $qb->orderBy('t.name', 'ASC')
+                 ->getQuery()
+                 ->getResult();
+    }
 }
