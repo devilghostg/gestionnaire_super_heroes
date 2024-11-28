@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'équipe{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="edit-container">
+        <div class="edit-header">
+            <h1>Modifier l'équipe</h1>
+            <a href="{{ path('app_team_index') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Retour à la liste
+            </a>
+        </div>
+
+        <div class="edit-form-container">
+            {{ form_start(form, {'attr': {'class': 'team-form'}}) }}
+                <div class="form-group">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.superHeroes) }}
+                    {{ form_widget(form.superHeroes, {'attr': {'class': 'form-control select2'}}) }}
+                    {{ form_errors(form.superHeroes) }}
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+
+                    {{ include('team/_delete_form.html.twig') }}
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser Select2 pour une meilleure sélection multiple
+            $('.select2').select2({
+                placeholder: 'Sélectionnez les héros',
+                allowClear: true,
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+{% endblock %}
