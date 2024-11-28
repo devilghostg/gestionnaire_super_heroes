@@ -51,6 +51,7 @@ class MissionAssignment
     public function setMission(?Mission $mission): static
     {
         $this->mission = $mission;
+
         return $this;
     }
 
@@ -62,10 +63,11 @@ class MissionAssignment
     public function setHero(?SuperHero $hero): static
     {
         $this->hero = $hero;
+
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function isIsActive(): ?bool
     {
         return $this->isActive;
     }
@@ -73,12 +75,20 @@ class MissionAssignment
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
     public function getAssignedAt(): ?\DateTimeImmutable
     {
         return $this->assignedAt;
+    }
+
+    public function setAssignedAt(\DateTimeImmutable $assignedAt): static
+    {
+        $this->assignedAt = $assignedAt;
+
+        return $this;
     }
 
     public function getCompletedAt(): ?\DateTimeImmutable
@@ -89,6 +99,7 @@ class MissionAssignment
     public function setCompletedAt(?\DateTimeImmutable $completedAt): static
     {
         $this->completedAt = $completedAt;
+
         return $this;
     }
 
@@ -100,12 +111,14 @@ class MissionAssignment
     public function setEnergy(float $energy): static
     {
         $this->energy = max(0, min(100, $energy));
+
         return $this;
     }
 
     public function decreaseEnergy(float $amount): static
     {
         $this->energy = max(0, $this->energy - $amount);
+
         return $this;
     }
 }

@@ -241,23 +241,43 @@ class Mission
             $this->assignments->add($assignment);
             $assignment->setMission($this);
         }
+
         return $this;
     }
 
     public function removeAssignment(MissionAssignment $assignment): static
     {
         if ($this->assignments->removeElement($assignment)) {
+            // set the owning side to null (unless already changed)
             if ($assignment->getMission() === $this) {
                 $assignment->setMission(null);
             }
         }
+
         return $this;
+    }
+
+    public function getActiveAssignments(): Collection
+    {
+        return $this->assignments->filter(function(MissionAssignment $assignment) {
+            return $assignment->isIsActive();
+        });
+    }
+
+    public function hasActiveHero(SuperHero $hero): bool
+    {
+        foreach ($this->getActiveAssignments() as $assignment) {
+            if ($assignment->getHero() === $hero) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getActiveHeroes(): array
     {
         return $this->assignments
-            ->filter(fn(MissionAssignment $a) => $a->isActive())
+            ->filter(fn(MissionAssignment $a) => $a->isIsActive())
             ->map(fn(MissionAssignment $a) => $a->getHero())
             ->toArray();
     }
@@ -265,7 +285,7 @@ class Mission
     public function isHeroAssigned(SuperHero $hero): bool
     {
         return $this->assignments->exists(
-            fn(int $key, MissionAssignment $a) => $a->getHero() === $hero && $a->isActive()
+            fn(int $key, MissionAssignment $a) => $a->getHero() === $hero && $a->isIsActive()
         );
     }
 }

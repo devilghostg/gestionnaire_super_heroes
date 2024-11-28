@@ -122,91 +122,36 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/assign', name: 'app_mission_assign', methods: ['POST'])]
-    public function assign(
+    #[Route('/{id}/start', name: 'app_mission_start', methods: ['POST'])]
+    public function startMission(
         Mission $mission,
         Request $request,
-        SuperHeroRepository $superHeroRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        if ($mission->getStatus() !== 'pending') {
-            $this->addFlash('error', 'Cette mission n\'est pas disponible');
-            return $this->redirectToRoute('app_mission_index');
-        }
-
-        $heroId = $request->request->get('heroId');
-        if (!$heroId) {
-            $this->addFlash('error', 'Aucun héros sélectionné');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
-        }
-
-        $hero = $superHeroRepository->find($heroId);
-        if (!$hero) {
-            $this->addFlash('error', 'Héros non trouvé');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
-        }
-
-        // Créer une nouvelle assignation
-        $assignment = new MissionAssignment();
-        $assignment->setMission($mission)
-                  ->setHero($hero)
-                  ->setIsActive(true);
-
-        $entityManager->persist($assignment);
-        $mission->setStatus('in_progress');
-        $mission->setStartedAt(new \DateTimeImmutable());
-        
-        $entityManager->flush();
-
-        return $this->redirectToRoute('app_mission_progress', ['id' => $mission->getId()]);
-    }
-
-    #[Route('/{id}/start', name: 'app_mission_start', methods: ['POST'])]
-    public function start(Request $request, Mission $mission, EntityManagerInterface $entityManager): Response
-    {
         if ($this->isCsrfTokenValid('start'.$mission->getId(), $request->request->get('_token'))) {
             if ($mission->getStatus() !== 'pending') {
                 $this->addFlash('error', 'Cette mission ne peut pas être démarrée');
-                return $this->redirectToRoute('app_mission_index');
+                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
             }
 
-            // Vérifier si un héros est assigné
-            if (!$mission->getSuperHero()) {
-                $this->addFlash('error', 'Aucun héros n\'est assigné à cette mission');
-                return $this->redirectToRoute('app_mission_index');
-            }
-
-            // Vérifier l'énergie du héros
-            $hero = $mission->getSuperHero();
-            if ($hero->getEnergy() < 20) {
-                $this->addFlash('error', 'Le héros n\'a pas assez d\'énergie pour cette mission');
-                return $this->redirectToRoute('app_mission_index');
-            }
-
-            // Initialiser l'énergie si nécessaire
-            if ($hero->getEnergy() === null) {
-                $hero->setEnergy(100);
+            if ($mission->getActiveAssignments()->isEmpty()) {
+                $this->addFlash('error', 'Vous devez assigner au moins un héros avant de démarrer la mission');
+                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
             }
 
             $mission->setStatus('in_progress');
             $mission->setStartedAt(new \DateTimeImmutable());
             
-            // Ajouter un message de début de mission
-            $currentResult = $mission->getResult() ?? '';
-            $log = [];
-            $log[] = "[Info] Mission démarrée !";
-            $log[] = "[Info] Héros assigné : " . $hero->getName();
-            $log[] = "[Info] Énergie initiale : " . $hero->getEnergy() . "%";
-            
-            $mission->setResult($currentResult . "\n" . implode("\n", $log));
-            
-            $entityManager->persist($mission);
-            $entityManager->flush();
+            foreach ($mission->getActiveAssignments() as $assignment) {
+                $hero = $assignment->getHero();
+                $hero->setEnergy($hero->getEnergy() - 20);
+            }
 
-            return $this->redirectToRoute('app_mission_progress', ['id' => $mission->getId()]);
+            $entityManager->flush();
+            $this->addFlash('success', 'La mission a été démarrée avec succès');
         }
 
-        return $this->redirectToRoute('app_mission_index');
+        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
     }
 
     #[Route('/{id}/progress', name: 'app_mission_progress', methods: ['GET'])]
@@ -218,16 +163,20 @@ class MissionController extends AbstractController
             return $this->redirectToRoute('app_mission_index');
         }
 
-        // Vérifier si le héros a assez d'énergie
-        $hero = $mission->getSuperHero();
-        if ($hero) {
+        // Vérifier si les héros ont assez d'énergie
+        foreach ($mission->getActiveAssignments() as $assignment) {
+            $hero = $assignment->getHero();
             // Recharger l'énergie avant de vérifier
             $energyRechargeService->rechargeEnergy($hero);
             
             if ($hero->getEnergy() < 10) {
-                $this->addFlash('warning', 'Le héros est trop fatigué pour continuer la mission !');
-                return $this->redirectToRoute('app_mission_index');
+                $this->addFlash('warning', sprintf('Le héros %s est trop fatigué pour continuer la mission !', $hero->getName()));
             }
+        }
+
+        if ($mission->getActiveAssignments()->isEmpty()) {
+            $this->addFlash('error', 'Il n\'y a plus de héros disponibles pour cette mission !');
+            return $this->redirectToRoute('app_mission_index');
         }
 
         return $this->render('mission/progress.html.twig', [
@@ -248,9 +197,9 @@ class MissionController extends AbstractController
         // Mettre à jour la progression
         $mission->setProgress($progress);
 
-        // Mettre à jour l'énergie du héros
-        $hero = $mission->getSuperHero();
-        if ($hero) {
+        // Mettre à jour l'énergie des héros
+        foreach ($mission->getActiveAssignments() as $assignment) {
+            $hero = $assignment->getHero();
             $energyLoss = 0.5; // Perte d'énergie progressive
             $newEnergy = max(0, $hero->getEnergy() - $energyLoss);
             $hero->setEnergy($newEnergy);
@@ -270,10 +219,15 @@ class MissionController extends AbstractController
         $entityManager->persist($mission);
         $entityManager->flush();
 
+        $heroEnergies = [];
+        foreach ($mission->getActiveAssignments() as $assignment) {
+            $heroEnergies[$assignment->getHero()->getId()] = $assignment->getHero()->getEnergy();
+        }
+
         return new JsonResponse([
             'success' => true,
             'progress' => $progress,
-            'heroEnergy' => $hero ? $hero->getEnergy() : null,
+            'heroEnergies' => $heroEnergies,
             'logs' => $logs
         ]);
     }
@@ -298,24 +252,27 @@ class MissionController extends AbstractController
             $timeScore = $timeRatio * 40;
             
             // Score basé sur l'énergie restante (30% du score total)
-            $hero = $mission->getSuperHero();
             $energyScore = 0;
-            if ($hero) {
-                $energyRatio = $hero->getEnergy() / 100;
+            if (!$mission->getActiveAssignments()->isEmpty()) {
+                $totalEnergy = 0;
+                foreach ($mission->getActiveAssignments() as $assignment) {
+                    $totalEnergy += $assignment->getHero()->getEnergy();
+                }
+                $averageEnergy = $totalEnergy / $mission->getActiveAssignments()->count();
+                $energyRatio = $averageEnergy / 100;
                 $energyScore = $energyRatio * 30;
             }
             
             // Score basé sur la difficulté (30% du score total)
-            $difficultyScore = (6 - $mission->getDifficulty()) * 6; // Plus la difficulté est élevée, plus le score est haut
+            $difficultyScore = (6 - $mission->getDifficulty()) * 6;
             
             // Score final
             $score = round($timeScore + $energyScore + $difficultyScore);
             $mission->setScore($score);
             
-            // Mettre à jour la dernière mission du héros
-            if ($hero) {
-                $hero->setLastMission($mission);
-                $entityManager->persist($hero);
+            // Mettre à jour le statut des assignations
+            foreach ($mission->getActiveAssignments() as $assignment) {
+                $assignment->setIsActive(false);
             }
             
             $entityManager->persist($mission);
@@ -349,18 +306,20 @@ class MissionController extends AbstractController
             $log = [];
             $log[] = "[Erreur] Mission annulée !";
             
-            // Ajouter un message sur l'état du héros
-            $hero = $mission->getSuperHero();
-            if ($hero) {
+            // Ajouter un message sur l'état des héros
+            foreach ($mission->getAssignments() as $assignment) {
+                $hero = $assignment->getHero();
                 $energyLoss = rand(5, 15);
                 $newEnergy = max(0, $hero->getEnergy() - $energyLoss);
                 $hero->setEnergy($newEnergy);
                 
                 if ($newEnergy < 20) {
-                    $log[] = "[Attention] Le héros est fatigué ! Énergie restante : {$newEnergy}%";
+                    $log[] = sprintf("[Attention] Le héros %s est fatigué ! Énergie restante : %d%%", $hero->getName(), $newEnergy);
                 } else {
-                    $log[] = "[Info] Énergie restante du héros : {$newEnergy}%";
+                    $log[] = sprintf("[Info] Énergie restante du héros %s : %d%%", $hero->getName(), $newEnergy);
                 }
+
+                $assignment->setIsActive(false);
             }
             
             $mission->setResult($currentResult . "\n" . implode("\n", $log));
@@ -409,6 +368,101 @@ class MissionController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/assign-hero', name: 'app_mission_assign_hero', methods: ['GET'])]
+    public function assignHero(Mission $mission, SuperHeroRepository $superHeroRepository): Response
+    {
+        if ($mission->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Cette mission n\'est pas disponible pour l\'assignation');
+            return $this->redirectToRoute('app_mission_index');
+        }
+
+        return $this->render('mission/assign_hero.html.twig', [
+            'mission' => $mission,
+            'available_heroes' => $superHeroRepository->findAvailableHeroes(),
+        ]);
+    }
+
+    #[Route('/{id}/assign-hero/{heroId}', name: 'app_mission_assign_hero_post', methods: ['POST'])]
+    public function assignHeroPost(
+        Mission $mission,
+        int $heroId,
+        Request $request,
+        SuperHeroRepository $superHeroRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if (!$this->isCsrfTokenValid('assign_hero'.$mission->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        if ($mission->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Cette mission n\'est pas disponible pour l\'assignation');
+            return $this->redirectToRoute('app_mission_index');
+        }
+
+        $hero = $superHeroRepository->find($heroId);
+        if (!$hero) {
+            $this->addFlash('error', 'Héros non trouvé');
+            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+        }
+
+        // Vérifier si le héros n'est pas déjà assigné
+        if ($mission->hasActiveHero($hero)) {
+            $this->addFlash('error', 'Ce héros est déjà assigné à cette mission');
+            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+        }
+
+        // Vérifier l'énergie du héros
+        if ($hero->getEnergy() < 20) {
+            $this->addFlash('error', 'Le héros n\'a pas assez d\'énergie pour cette mission');
+            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+        }
+
+        // Créer une nouvelle assignation
+        $assignment = new MissionAssignment();
+        $assignment->setMission($mission)
+                  ->setHero($hero)
+                  ->setIsActive(true)
+                  ->setAssignedAt(new \DateTimeImmutable())
+                  ->setEnergy($hero->getEnergy());
+
+        $entityManager->persist($assignment);
+        $mission->addAssignment($assignment);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Héros assigné avec succès à la mission');
+        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+    }
+
+    #[Route('/{id}/remove-hero/{assignment}', name: 'app_mission_remove_hero', methods: ['POST'])]
+    public function removeHero(
+        Mission $mission,
+        MissionAssignment $assignment,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($assignment->getMission() !== $mission) {
+            $this->addFlash('error', 'Cet assignment n\'appartient pas à cette mission');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        if (!$this->isCsrfTokenValid('remove_hero'.$assignment->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        if ($mission->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Impossible de retirer un héros d\'une mission en cours ou terminée');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        $entityManager->remove($assignment);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le héros a été retiré de la mission avec succès');
+        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+    }
+
     private function archiveAndDeleteMission(
         Mission $mission,
         MissionRepository $missionRepository,
@@ -426,7 +480,7 @@ class MissionController extends AbstractController
         // Sauvegarder les noms des héros assignés
         $heroNames = [];
         foreach ($mission->getAssignments() as $assignment) {
-            if ($assignment->isActive()) {
+            if ($assignment->isIsActive()) {
                 $heroNames[] = $assignment->getHero()->getName();
             }
         }

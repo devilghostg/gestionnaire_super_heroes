@@ -40,4 +40,14 @@ class SuperHeroRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findAvailableHeroes(): array
+    {
+        return $this->createQueryBuilder('h')
+            ->where('h.energy >= :minEnergy')
+            ->setParameter('minEnergy', 20)
+            ->orderBy('h.energy', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }
