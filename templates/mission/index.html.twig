@@ -22,7 +22,24 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="mission-status-badge">
-                                <span class="badge {{ mission.status|lower }}">{{ mission.status|title|replace({'_': ' '}) }}</span>
+                                {% set statusLabel = {
+                                    'pending': 'En attente',
+                                    'in_progress': 'En cours',
+                                    'completed': 'Terminée',
+                                    'failed': 'Échouée',
+                                    'cancelled': 'Annulée'
+                                } %}
+                                {% set statusIcon = {
+                                    'pending': 'bi-clock',
+                                    'in_progress': 'bi-play-circle',
+                                    'completed': 'bi-check-circle',
+                                    'failed': 'bi-x-circle',
+                                    'cancelled': 'bi-dash-circle'
+                                } %}
+                                <span class="status-badge {{ mission.status }}">
+                                    <i class="bi {{ statusIcon[mission.status] }}"></i>
+                                    {{ statusLabel[mission.status] }}
+                                </span>
                             </div>
                             
                             <h2 class="mission-card-title">{{ mission.title }}</h2>
@@ -36,7 +53,34 @@
                                     <strong>Héros assignés:</strong>
                                     {% if mission.superHero %}
                                         <div class="heroes-list">
-                                            <span class="badge">{{ mission.superHero.name }}</span>
+                                            <div class="hero-card">
+                                                <div class="hero-info">
+                                                    <span class="hero-name">{{ mission.superHero.name }}</span>
+                                                    <div class="hero-stats">
+                                                        <div class="energy-bar">
+                                                            <span class="label">Énergie:</span>
+                                                            <div class="progress">
+                                                                <div class="progress-bar" 
+                                                                     role="progressbar" 
+                                                                     style="width: {{ mission.superHero.energy }}%"
+                                                                     aria-valuenow="{{ mission.superHero.energy }}" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100">
+                                                                    {{ mission.superHero.energy }}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="hero-powers">
+                                                            <span class="label">Pouvoirs:</span>
+                                                            <div class="powers-list">
+                                                                {% for power in mission.superHero.powers %}
+                                                                    <span class="power-badge">{{ power.name }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     {% else %}
                                         <p class="no-heroes">Aucun héros assigné pour le moment</p>
@@ -64,16 +108,25 @@
                                 <i class="bi bi-eye"></i>
                                 Voir
                             </a>
-                            <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="mission-btn edit">
-                                <i class="bi bi-pencil"></i>
-                                Éditer
-                            </a>
-                            {% if mission.status != 'completed' %}
-                                <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="mission-btn progress">
-                                    <i class="bi bi-list-check"></i>
-                                    Progression
+                            {% if mission.status == 'pending' %}
+                                <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="mission-btn edit">
+                                    <i class="bi bi-pencil"></i>
+                                    Éditer
                                 </a>
                             {% endif %}
+                            <div class="mission-actions">
+                                {% if mission.status == 'pending' %}
+                                    {% if mission.superHero %}
+                                        <a href="{{ path('app_mission_start', {'id': mission.id}) }}" class="btn btn-primary">
+                                            <i class="bi bi-play-fill"></i> Lancer la mission
+                                        </a>
+                                    {% endif %}
+                                {% elseif mission.status == 'in_progress' %}
+                                    <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn btn-info">
+                                        <i class="bi bi-eye"></i> Voir la mission
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

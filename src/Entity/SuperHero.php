@@ -59,6 +59,8 @@ class SuperHero
     {
         $this->missions = new ArrayCollection();
         $this->powers = new ArrayCollection();
+        $this->energy = 100;
+        $this->is_active = false;
         $this->missionAssignments = new ArrayCollection();
     }
 
@@ -164,24 +166,22 @@ class SuperHero
         return $this->missions;
     }
 
-    public function addMission(Mission $mission): static
+    public function addMission(Mission $mission): self
     {
         if (!$this->missions->contains($mission)) {
-            $this->missions->add($mission);
+            $this->missions[] = $mission;
             $mission->setSuperHero($this);
         }
-
         return $this;
     }
 
-    public function removeMission(Mission $mission): static
+    public function removeMission(Mission $mission): self
     {
         if ($this->missions->removeElement($mission)) {
             if ($mission->getSuperHero() === $this) {
                 $mission->setSuperHero(null);
             }
         }
-
         return $this;
     }
 
@@ -196,9 +196,8 @@ class SuperHero
     public function addPower(Power $power): self
     {
         if (!$this->powers->contains($power)) {
-            $this->powers->add($power);
+            $this->powers[] = $power;
         }
-
         return $this;
     }
 

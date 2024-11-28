@@ -50,7 +50,7 @@ class Mission
     #[ORM\Column(nullable: true)]
     private ?int $score = null;
 
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?int $progress = 0;
 
     #[ORM\ManyToMany(targetEntity: Power::class)]

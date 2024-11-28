@@ -1,48 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Assigner un héros{% endblock %}
+{% block title %}Assigner un héros à la mission{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/mission.css') }}">
+{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h1 class="mb-0">Assigner un héros à la mission : {{ mission.title }}</h1>
-            </div>
-            <div class="card-body">
-                {% if available_heroes|length > 0 %}
-                    <div class="row">
-                        {% for hero in available_heroes %}
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ hero.name }}</h5>
-                                        <p class="card-text">
-                                            <strong>Énergie :</strong> {{ hero.energy }}%<br>
-                                            <strong>Pouvoir :</strong> {{ hero.power ? hero.power.name : 'Aucun' }}
-                                        </p>
-                                        <form method="post" action="{{ path('app_mission_assign_hero_post', {'id': mission.id, 'heroId': hero.id}) }}">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('assign_hero' ~ mission.id) }}">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-user-plus"></i> Sélectionner
-                                            </button>
-                                        </form>
+    <div class="container">
+        <h1>Assigner un héros à la mission: {{ mission.title }}</h1>
+
+        <div class="available-heroes">
+            <h2>Héros disponibles</h2>
+            
+            <form method="post" action="{{ path('app_mission_assign_hero', {'id': mission.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('assign_hero' ~ mission.id) }}">
+                <div class="heroes-grid">
+                    {% for hero in available_heroes %}
+                        <div class="hero-selection-card">
+                            <input type="radio" name="hero_id" value="{{ hero.id }}" id="hero_{{ hero.id }}" class="hero-radio">
+                            <label for="hero_{{ hero.id }}" class="hero-label">
+                                <div class="hero-info">
+                                    <h3>{{ hero.name }}</h3>
+                                    <div class="hero-stats">
+                                        <div class="energy-bar">
+                                            <span class="label">Énergie:</span>
+                                            <div class="progress">
+                                                <div class="progress-bar" style="width: {{ hero.energy }}%">
+                                                    {{ hero.energy }}%
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="hero-powers">
+                                            <span class="label">Pouvoirs:</span>
+                                            <div class="powers-list">
+                                                {% for power in hero.powers %}
+                                                    <span class="power-badge">{{ power.name }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i> Aucun héros n'est disponible pour le moment.
-                    </div>
-                {% endif %}
-
-                <div class="mt-3">
-                    <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour à la mission
-                    </a>
+                            </label>
+                        </div>
+                    {% else %}
+                        <p>Aucun héros disponible pour le moment.</p>
+                    {% endfor %}
                 </div>
-            </div>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary">Retour</a>
+                    <button type="submit" class="btn btn-primary">Assigner le héros</button>
+                </div>
+            </form>
         </div>
     </div>
 {% endblock %}

@@ -29,13 +29,38 @@ use Symfony\Component\Routing\Annotation\Route;
 class MissionController extends AbstractController
 {
     #[Route('/', name: 'app_mission_index', methods: ['GET'])]
-    public function index(MissionRepository $missionRepository, EntityManagerInterface $entityManager): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
-        // Vérifier et supprimer les missions expirées
-        $missions = $missionRepository->findAll();
+        // Créer une requête DQL pour charger les missions avec leurs héros et pouvoirs
+        $dql = "
+            SELECT m, h, p
+            FROM App\Entity\Mission m
+            LEFT JOIN m.superHero h
+            LEFT JOIN h.powers p
+            ORDER BY m.id DESC
+        ";
+        
+        $query = $entityManager->createQuery($dql);
+        $missions = $query->getResult();
+        
+        // Mettre à jour la progression des missions en cours
+        foreach ($missions as $mission) {
+            if ($mission->getStatus() === 'in_progress') {
+                $elapsedTime = time() - $mission->getStartedAt()->getTimestamp();
+                $totalTime = $mission->getTimeLimit() * 60;
+                $progress = min(100, (int)(($elapsedTime / $totalTime) * 100));
+                $mission->setProgress($progress);
+                
+                if ($progress >= 100) {
+                    $mission->setStatus('completed');
+                    $mission->setCompletedAt(new \DateTime());
+                    $entityManager->flush();
+                }
+            }
+        }
         
         return $this->render('mission/index.html.twig', [
-            'missions' => $missions
+            'missions' => $missions,
         ]);
     }
 
@@ -122,36 +147,28 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/start', name: 'app_mission_start', methods: ['POST'])]
-    public function startMission(
-        Mission $mission,
-        Request $request,
-        EntityManagerInterface $entityManager
-    ): Response {
-        if ($this->isCsrfTokenValid('start'.$mission->getId(), $request->request->get('_token'))) {
-            if ($mission->getStatus() !== 'pending') {
-                $this->addFlash('error', 'Cette mission ne peut pas être démarrée');
-                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
-            }
-
-            if ($mission->getActiveAssignments()->isEmpty()) {
-                $this->addFlash('error', 'Vous devez assigner au moins un héros avant de démarrer la mission');
-                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
-            }
-
-            $mission->setStatus('in_progress');
-            $mission->setStartedAt(new \DateTimeImmutable());
-            
-            foreach ($mission->getActiveAssignments() as $assignment) {
-                $hero = $assignment->getHero();
-                $hero->setEnergy($hero->getEnergy() - 20);
-            }
-
-            $entityManager->flush();
-            $this->addFlash('success', 'La mission a été démarrée avec succès');
+    #[Route('/{id}/start', name: 'app_mission_start', methods: ['GET'])]
+    public function startMission(Mission $mission, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier si la mission peut être démarrée
+        if ($mission->getStatus() !== 'pending' || !$mission->getSuperHero()) {
+            $this->addFlash('error', 'Cette mission ne peut pas être démarrée.');
+            return $this->redirectToRoute('app_mission_index');
         }
 
-        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        // Démarrer la mission
+        $mission->setStatus('in_progress');
+        $mission->setStartedAt(new \DateTimeImmutable());
+        $mission->setProgress(0);
+        
+        $entityManager->flush();
+        
+        $this->addFlash('success', 'La mission a été démarrée avec succès !');
+        
+        // Rediriger vers la page de progression
+        return $this->redirectToRoute('app_mission_progress', [
+            'id' => $mission->getId()
+        ]);
     }
 
     #[Route('/{id}/progress', name: 'app_mission_progress', methods: ['GET'])]
@@ -351,17 +368,46 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/assign-hero', name: 'app_mission_assign_hero', methods: ['GET'])]
-    public function assignHero(Mission $mission, SuperHeroRepository $superHeroRepository): Response
+    #[Route('/{id}/assign-hero', name: 'app_mission_assign_hero', methods: ['GET', 'POST'])]
+    public function assignHero(Request $request, Mission $mission, EntityManagerInterface $entityManager, SuperHeroRepository $superHeroRepository): Response
     {
-        if ($mission->getStatus() !== 'pending') {
-            $this->addFlash('error', 'Cette mission n\'est pas disponible pour l\'assignation');
-            return $this->redirectToRoute('app_mission_index');
+        if ($request->isMethod('POST')) {
+            $heroId = $request->request->get('hero_id');
+            
+            // Charger le héros avec ses pouvoirs
+            $hero = $entityManager->createQuery(
+                'SELECT h, p 
+                FROM App\Entity\SuperHero h 
+                LEFT JOIN h.powers p 
+                WHERE h.id = :heroId'
+            )
+            ->setParameter('heroId', $heroId)
+            ->getOneOrNullResult();
+            
+            if ($hero) {
+                $mission->setSuperHero($hero);
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'Héros assigné avec succès à la mission.');
+                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            }
         }
-
+        
+        // Récupérer tous les héros disponibles avec leurs pouvoirs
+        $availableHeroes = $entityManager->createQuery(
+            'SELECT h, p 
+            FROM App\Entity\SuperHero h 
+            LEFT JOIN h.powers p 
+            WHERE h.id NOT IN (
+                SELECT IDENTITY(m.superHero) 
+                FROM App\Entity\Mission m 
+                WHERE m.superHero IS NOT NULL
+            )'
+        )->getResult();
+        
         return $this->render('mission/assign_hero.html.twig', [
             'mission' => $mission,
-            'available_heroes' => $superHeroRepository->findAvailableHeroes(),
+            'available_heroes' => $availableHeroes,
         ]);
     }
 
