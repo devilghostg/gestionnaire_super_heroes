@@ -2,58 +2,23 @@
 
 {% block title %}Détails de l'équipe{% endblock %}
 
-{% block body %}
-    <div class="container mt-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h1 class="mb-0">{{ team.name }}</h1>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3>Description</h3>
-                        <p class="lead">{{ team.description|default('Aucune description disponible.') }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h3>Membres de l'équipe</h3>
-                        <div class="list-group">
-                            {% for hero in team.superHeroes %}
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5 class="mb-1">{{ hero.name }}</h5>
-                                            <small>{{ hero.alias }}</small>
-                                        </div>
-                                        <div>
-                                            {% if hero.power %}
-                                                <span class="badge bg-info">{{ hero.power.name }}</span>
-                                            {% endif %}
-                                            <div class="progress mt-1" style="width: 100px;">
-                                                <div class="progress-bar {% if hero.energy < 30 %}bg-danger{% else %}bg-success{% endif %}" 
-                                                     role="progressbar" 
-                                                     style="width: {{ hero.energy }}%">
-                                                    {{ hero.energy }}%
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="list-group-item text-muted">
-                                    Aucun héros dans cette équipe
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+{% endblock %}
 
-                <div class="mt-4 d-flex justify-content-between">
-                    <a href="{{ path('app_team_index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Retour à la liste
-                    </a>
-                    <div>
-                        <a href="{{ path('app_team_edit', {'id': team.id}) }}" class="btn btn-warning">
-                            <i class="bi bi-pencil"></i> Modifier
+{% block body %}
+    <div class="container">
+        <div class="action-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1>{{ team.name }}</h1>
+                    <div class="btn-group">
+                        <a href="{{ path('app_team_edit', {'id': team.id}) }}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{{ path('app_team_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
                         </a>
                         <form method="post" action="{{ path('app_team_delete', {'id': team.id}) }}" 
                               style="display: inline-block;" 
@@ -63,6 +28,55 @@
                                 <i class="bi bi-trash"></i> Supprimer
                             </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="team-info-section">
+                    <h2 class="section-title">Description</h2>
+                    <p class="team-description">{{ team.description|default('Aucune description disponible.') }}</p>
+                </div>
+
+                <div class="team-heroes-section">
+                    <h2 class="section-title">Membres de l'équipe</h2>
+                    <div class="hero-grid">
+                        {% for hero in team.superHeroes %}
+                            <div class="hero-card">
+                                <div class="hero-card-header">
+                                    <h3 class="hero-name">{{ hero.name }}</h3>
+                                </div>
+                                <div class="hero-card-body">
+                                    <div class="hero-powers">
+                                        {% if hero.power or hero.powers|length > 0 %}
+                                            {% if hero.power %}
+                                                <span class="power-badge">{{ hero.power.name }}</span>
+                                            {% endif %}
+                                            {% for power in hero.powers %}
+                                                {% if power.id != hero.power.id %}
+                                                    <span class="power-badge">{{ power.name }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="no-power-badge">Aucun pouvoir</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="energy-section">
+                                        <div class="energy-label">Énergie</div>
+                                        <div class="energy-bar">
+                                            <div class="energy-progress {% if hero.energy < 30 %}low{% elseif hero.energy < 70 %}medium{% else %}high{% endif %}"
+                                                 style="width: {{ hero.energy }}%">
+                                                <span class="energy-text">{{ hero.energy }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="empty-heroes">
+                                <p>Aucun héros dans cette équipe</p>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

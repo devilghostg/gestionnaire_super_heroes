@@ -28,8 +28,8 @@ class Mission
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $startedAt = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $completedAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $completedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $cancelledAt = null;
@@ -50,12 +50,19 @@ class Mission
     #[ORM\Column(nullable: true)]
     private ?int $score = null;
 
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $progress = 0;
+
     #[ORM\ManyToMany(targetEntity: Power::class)]
     private Collection $requiredPowers;
+
+    #[ORM\OneToMany(mappedBy: 'mission', targetEntity: MissionAssignment::class, orphanRemoval: true)]
+    private Collection $assignments;
 
     public function __construct()
     {
         $this->requiredPowers = new ArrayCollection();
+        $this->assignments = new ArrayCollection();
         $this->status = 'pending';
         $this->timeLimit = 120; // 2 minutes par défaut
     }
@@ -109,12 +116,12 @@ class Mission
         return $this;
     }
 
-    public function getCompletedAt(): ?\DateTimeImmutable
+    public function getCompletedAt(): ?\DateTimeInterface
     {
         return $this->completedAt;
     }
 
-    public function setCompletedAt(?\DateTimeImmutable $completedAt): static
+    public function setCompletedAt(?\DateTimeInterface $completedAt): self
     {
         $this->completedAt = $completedAt;
         return $this;
@@ -186,6 +193,17 @@ class Mission
         return $this;
     }
 
+    public function getProgress(): ?int
+    {
+        return $this->progress;
+    }
+
+    public function setProgress(?int $progress): self
+    {
+        $this->progress = $progress;
+        return $this;
+    }
+
     /**
      * @return Collection<int, Power>
      */
@@ -207,5 +225,47 @@ class Mission
     {
         $this->requiredPowers->removeElement($power);
         return $this;
+    }
+
+    /**
+     * @return Collection<int, MissionAssignment>
+     */
+    public function getAssignments(): Collection
+    {
+        return $this->assignments;
+    }
+
+    public function addAssignment(MissionAssignment $assignment): static
+    {
+        if (!$this->assignments->contains($assignment)) {
+            $this->assignments->add($assignment);
+            $assignment->setMission($this);
+        }
+        return $this;
+    }
+
+    public function removeAssignment(MissionAssignment $assignment): static
+    {
+        if ($this->assignments->removeElement($assignment)) {
+            if ($assignment->getMission() === $this) {
+                $assignment->setMission(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getActiveHeroes(): array
+    {
+        return $this->assignments
+            ->filter(fn(MissionAssignment $a) => $a->isActive())
+            ->map(fn(MissionAssignment $a) => $a->getHero())
+            ->toArray();
+    }
+
+    public function isHeroAssigned(SuperHero $hero): bool
+    {
+        return $this->assignments->exists(
+            fn(int $key, MissionAssignment $a) => $a->getHero() === $hero && $a->isActive()
+        );
     }
 }

@@ -34,18 +34,34 @@ class TeamType extends AbstractType
             ])
             ->add('superHeroes', EntityType::class, [
                 'class' => SuperHero::class,
-                'choice_label' => 'name',
+                'choice_label' => function(SuperHero $hero) {
+                    // Récupérer tous les pouvoirs (incluant le pouvoir principal et les pouvoirs additionnels)
+                    $powers = $hero->getPowers()->toArray();
+                    if ($hero->getPower() !== null) {
+                        $powers[] = $hero->getPower();
+                    }
+                    
+                    // Filtrer les doublons et les valeurs nulles
+                    $powers = array_filter(array_unique($powers, SORT_REGULAR));
+                    
+                    $powerNames = array_map(function($power) {
+                        return $power->getName();
+                    }, $powers);
+                    
+                    $powerText = !empty($powerNames) ? implode(', ', $powerNames) : 'Aucun pouvoir';
+                    return $hero->getName() . '|||' . $powerText;
+                },
                 'multiple' => true,
                 'expanded' => true,
                 'label' => 'Super-héros',
                 'required' => false,
                 'by_reference' => false,
-                'attr' => [
-                    'class' => 'form-check-input'
-                ],
+                'choice_attr' => function($choice, $key, $value) {
+                    return ['class' => 'hero-checkbox'];
+                },
                 'label_attr' => [
-                    'class' => 'form-check-label'
-                ]
+                    'class' => 'hero-label'
+                ],
             ])
         ;
     }

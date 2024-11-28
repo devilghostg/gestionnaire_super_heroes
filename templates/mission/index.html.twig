@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Missions Gallery{% endblock %}
+{% block title %}Liste des Missions{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -8,88 +8,87 @@
 {% endblock %}
 
 {% block body %}
-    <div class="mission-header">
-        <h1 class="mission-title">Missions Gallery</h1>
-        <div class="header-actions">
-            <a href="{{ path('app_mission_history') }}" class="btn btn-secondary">
-                <i class="fas fa-history"></i> History
-            </a>
-            <a href="{{ path('app_mission_new') }}" class="btn">
-                <i class="fas fa-plus"></i> New Mission
-            </a>
-        </div>
-    </div>
-
-    <div class="grid">
-        {% for mission in missions %}
-            <div class="card">
-                <div class="card-body">
-                    <div class="mission-status-badge">
-                        <span class="badge mission-status {% if mission.status == 'completed' %}badge-success{% elseif mission.status == 'in_progress' %}badge-warning{% else %}badge-secondary{% endif %}">
-                            {{ mission.status|title|replace({'_': ' '}) }}
-                        </span>
-                    </div>
-
-                    <h2 class="mission-card-title">{{ mission.title }}</h2>
-                    
-                    {% if mission.description %}
-                        <p class="mission-card-description">{{ mission.description }}</p>
-                    {% endif %}
-
-                    <div class="mission-heroes">
-                        <strong>Assigned Heroes:</strong>
-                        {% if mission.superHero %}
-                            <div class="heroes-list">
-                                <span class="badge badge-info">
-                                    {{ mission.superHero.name }}
-                                </span>
-                            </div>
-                        {% else %}
-                            <p class="no-heroes">No heroes assigned yet</p>
-                        {% endif %}
-                    </div>
-
-                    {% if mission.startedAt %}
-                        <div class="mission-dates">
-                            <strong>Start Date:</strong>
-                            <span>{{ mission.startedAt|date('Y-m-d H:i') }}</span>
-                        </div>
-                    {% endif %}
-
-                    {% if mission.completedAt %}
-                        <div class="mission-dates">
-                            <strong>End Date:</strong>
-                            <span>{{ mission.completedAt|date('Y-m-d H:i') }}</span>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="card-footer">
-                    <div class="btn-group">
-                        <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="btn btn-secondary">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        {% if mission.status != 'completed' %}
-                            <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn" style="background: #FF9800;">
-                                <i class="fas fa-tasks"></i> Progress
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
+    <div class="container">
+        {% if missions is empty %}
+            <div class="empty-state">
+                <h2 class="empty-title">Aucune mission trouvée. Créez votre première mission !</h2>
+                <a href="{{ path('app_mission_new') }}" class="add-mission-btn">Ajouter une Mission</a>
             </div>
         {% else %}
-            <div class="card">
-                <div class="card-body" style="text-align: center; padding: 3rem;">
-                    <i class="fas fa-clipboard-list" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                    <p style="margin: 0; font-size: 1.2rem;">No missions found. Create your first mission!</p>
-                    <a href="{{ path('app_mission_new') }}" class="btn" style="margin-top: 1rem;">
-                        <i class="fas fa-plus"></i> Add Mission
-                    </a>
-                </div>
+            <h1 class="page-title">Liste des Missions</h1>
+            
+            <div class="grid">
+                {% for mission in missions %}
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="mission-status-badge">
+                                <span class="badge {{ mission.status|lower }}">{{ mission.status|title|replace({'_': ' '}) }}</span>
+                            </div>
+                            
+                            <h2 class="mission-card-title">{{ mission.title }}</h2>
+                            
+                            {% if mission.description %}
+                                <p class="mission-card-description">{{ mission.description }}</p>
+                            {% endif %}
+                            
+                            <div class="mission-info-section">
+                                <div class="mission-heroes">
+                                    <strong>Héros assignés:</strong>
+                                    {% if mission.superHero %}
+                                        <div class="heroes-list">
+                                            <span class="badge">{{ mission.superHero.name }}</span>
+                                        </div>
+                                    {% else %}
+                                        <p class="no-heroes">Aucun héros assigné pour le moment</p>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if mission.startedAt %}
+                                    <div class="mission-dates">
+                                        <strong>Date de début:</strong>
+                                        <span>{{ mission.startedAt|date('Y-m-d H:i') }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if mission.completedAt %}
+                                    <div class="mission-dates">
+                                        <strong>Date de fin:</strong>
+                                        <span>{{ mission.completedAt|date('Y-m-d H:i') }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="mission-btn view">
+                                <i class="bi bi-eye"></i>
+                                Voir
+                            </a>
+                            <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="mission-btn edit">
+                                <i class="bi bi-pencil"></i>
+                                Éditer
+                            </a>
+                            {% if mission.status != 'completed' %}
+                                <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="mission-btn progress">
+                                    <i class="bi bi-list-check"></i>
+                                    Progression
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+
+            <div class="actions mt-4">
+                <a href="{{ path('app_mission_new') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Créer une nouvelle mission
+                </a>
+                <a href="{{ path('app_mission_history') }}" class="btn btn-secondary">
+                    <i class="bi bi-clock-history"></i>
+                    Historique
+                </a>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

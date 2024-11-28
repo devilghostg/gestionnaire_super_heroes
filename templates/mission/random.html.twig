@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une Mission Aléatoire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/mission.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="random-mission-card">
+        <h1>Créer une Mission Aléatoire</h1>
+        <p class="mission-intro">Choisissez la difficulté de votre mission et laissez le hasard faire le reste !</p>
+
+        <form method="post" class="difficulty-form">
+            <input type="hidden" name="_token" value="{{ csrf_token('random_mission') }}">
+            
+            <div class="difficulty-options">
+                <button type="submit" name="difficulty" value="easy" class="difficulty-btn easy">
+                    <i class="fas fa-star"></i>
+                    <span>Facile</span>
+                    <small>Pour les héros débutants</small>
+                </button>
+
+                <button type="submit" name="difficulty" value="medium" class="difficulty-btn medium">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <span>Moyenne</span>
+                    <small>Pour les héros expérimentés</small>
+                </button>
+
+                <button type="submit" name="difficulty" value="hard" class="difficulty-btn hard">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <span>Difficile</span>
+                    <small>Pour les héros d'élite</small>
+                </button>
+            </div>
+        </form>
+
+        <div class="back-link">
+            <a href="{{ path('app_mission_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

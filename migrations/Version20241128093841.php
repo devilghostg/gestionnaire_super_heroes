@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20241128093841 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return '';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE super_hero DROP FOREIGN KEY FK_BD3D67EF5718C47A');
+        $this->addSql('ALTER TABLE super_hero ADD CONSTRAINT FK_BD3D67EF5718C47A FOREIGN KEY (last_mission_id) REFERENCES mission (id) ON DELETE SET NULL');
+    }
+
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE super_hero DROP FOREIGN KEY FK_BD3D67EF5718C47A');
+        $this->addSql('ALTER TABLE super_hero ADD CONSTRAINT FK_BD3D67EF5718C47A FOREIGN KEY (last_mission_id) REFERENCES mission (id)');
+    }
+}

@@ -48,10 +48,18 @@ class SuperHero
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $model3dPath = null;
 
+    #[ORM\OneToOne(targetEntity: Mission::class)]
+    #[ORM\JoinColumn(name: 'last_mission_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Mission $lastMission = null;
+
+    #[ORM\OneToMany(mappedBy: 'hero', targetEntity: MissionAssignment::class, orphanRemoval: true)]
+    private Collection $missionAssignments;
+
     public function __construct()
     {
         $this->missions = new ArrayCollection();
         $this->powers = new ArrayCollection();
+        $this->missionAssignments = new ArrayCollection();
     }
 
     // Getter et Setter pour l'ID
@@ -209,5 +217,66 @@ class SuperHero
     {
         $this->model3dPath = $model3dPath;
         return $this;
+    }
+
+    public function getLastMission(): ?Mission
+    {
+        return $this->lastMission;
+    }
+
+    public function setLastMission(?Mission $mission): self
+    {
+        $this->lastMission = $mission;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MissionAssignment>
+     */
+    public function getMissionAssignments(): Collection
+    {
+        return $this->missionAssignments;
+    }
+
+    public function addMissionAssignment(MissionAssignment $assignment): static
+    {
+        if (!$this->missionAssignments->contains($assignment)) {
+            $this->missionAssignments->add($assignment);
+            $assignment->setHero($this);
+        }
+        return $this;
+    }
+
+    public function removeMissionAssignment(MissionAssignment $assignment): static
+    {
+        if ($this->missionAssignments->removeElement($assignment)) {
+            if ($assignment->getHero() === $this) {
+                $assignment->setHero(null);
+            }
+        }
+        return $this;
+    }
+
+    public function isAvailableForMission(): bool
+    {
+        return !$this->missionAssignments->exists(
+            fn(int $key, MissionAssignment $a) => $a->isActive()
+        );
+    }
+
+    public function getCurrentMissionAssignment(): ?MissionAssignment
+    {
+        foreach ($this->missionAssignments as $assignment) {
+            if ($assignment->isActive()) {
+                return $assignment;
+            }
+        }
+        return null;
+    }
+
+    public function getCurrentMission(): ?Mission
+    {
+        $assignment = $this->getCurrentMissionAssignment();
+        return $assignment ? $assignment->getMission() : null;
     }
 }

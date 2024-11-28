@@ -32,5 +32,14 @@
                 {{ form_end(form) }}
             </div>
         </div>
+        <div class="mission-creation-options">
+            <div class="creation-card random">
+                <h2>Ou créez une mission aléatoire !</h2>
+                <p>Laissez le hasard décider de votre prochaine mission.</p>
+                <a href="{{ path('app_mission_random') }}" class="btn btn-primary">
+                    <i class="fas fa-random"></i> Créer une Mission Aléatoire
+                </a>
+            </div>
+        </div>
     </div>
 {% endblock %}

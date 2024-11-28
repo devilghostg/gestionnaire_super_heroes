@@ -4,120 +4,208 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('css/mission-progress.css') }}">
+    <style>
+        .mission-log {
+            height: 300px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+        .mission-log p {
+            margin: 0;
+            padding: 2px 0;
+        }
+        .energy-bar {
+            margin-top: 10px;
+        }
+        .energy-bar .progress {
+            height: 25px;
+        }
+        .hero-card {
+            background: rgba(0,0,0,0.05);
+            padding: 1rem;
+            border-radius: 5px;
+        }
+        .hero-info {
+            margin-bottom: 1rem;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-    {% if mission is null %}
-        <div class="container mt-4">
-            <div class="alert alert-warning">
-                Mission non trouvée ou non accessible.
-                <a href="{{ path('app_mission_index') }}" class="btn btn-primary">Retour à la liste</a>
-            </div>
-        </div>
-    {% else %}
-        <div class="container mt-4">
-            <div class="card action-card">
-                <div class="card-header">
-                    <h1>{{ mission.title|default('Mission en cours') }}</h1>
+    <div class="container mt-4">
+        <div class="card action-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">{{ mission.title }}</h1>
+                <div class="timer">
+                    <span id="missionTimer" class="badge bg-primary">--:--</span>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-8">
-                            <div class="progress progress-section">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+            </div>
+            
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Barre de progression -->
+                        <div class="progress-section mb-4">
+                            <h4>Progression de la mission</h4>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
                                      role="progressbar" 
-                                     aria-valuenow="0" 
+                                     style="width: {{ mission.progress|default(0) }}%"
+                                     aria-valuenow="{{ mission.progress|default(0) }}" 
                                      aria-valuemin="0" 
-                                     aria-valuemax="100">0%</div>
+                                     aria-valuemax="100">{{ mission.progress|default(0) }}%</div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="timer text-end">
-                                <span id="missionTimer">5:00</span>
+
+                        <!-- Journal de mission -->
+                        <div class="mission-log-section">
+                            <h4>Journal de mission</h4>
+                            <div id="missionLog" class="mission-log">
+                                {% if mission.result %}
+                                    {% for line in mission.result|split('\n') %}
+                                        <p>{{ line }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>[{{ "now"|date("H:i:s") }}] Mission démarrée...</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h4>Détails de la mission</h4>
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Difficulté
-                                    <span class="badge bg-primary">{{ mission.difficulty|default('N/A') }}</span>
-                                </li>
-                                <li class="list-group-item">
-                                    <h5>Description</h5>
-                                    <p>{{ mission.description|default('Aucune description disponible') }}</p>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h4>Super-héros assigné</h4>
+                    <div class="col-md-4">
+                        <!-- Informations du héros -->
+                        <div class="hero-section">
+                            <h4>Héros assigné</h4>
                             {% if mission.superHero %}
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ mission.superHero.name|default('Sans nom') }}</h5>
-                                        <p class="card-text">
-                                            <strong>Alias :</strong> {{ mission.superHero.alias|default('Inconnu') }}<br>
-                                            <strong>Niveau d'énergie :</strong> {{ mission.superHero.energy|default(0) }}
-                                        </p>
+                                <div class="hero-card">
+                                    <div class="hero-info">
+                                        <h5>{{ mission.superHero.name }}</h5>
+                                        <p class="text-muted mb-2">{{ mission.superHero.alias }}</p>
+                                    </div>
+                                    
+                                    <div class="energy-section">
+                                        <h6>Niveau d'énergie</h6>
+                                        <div class="energy-bar">
+                                            <div class="progress">
+                                                <div class="progress-bar {% if mission.superHero.energy < 20 %}bg-danger{% elseif mission.superHero.energy < 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ mission.superHero.energy }}%"
+                                                     aria-valuenow="{{ mission.superHero.energy }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    {{ mission.superHero.energy }}%
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                {% if mission.superHero.model3dPath %}
-                                    <div id="model3dContainer"></div>
-                                {% endif %}
                             {% else %}
-                                <div class="alert alert-warning">
-                                    Aucun super-héros n'est assigné à cette mission
-                                </div>
+                                <p class="text-muted">Aucun héros assigné</p>
                             {% endif %}
                         </div>
-                    </div>
 
-                    <div class="mt-4 text-center">
-                        <form id="missionForm" method="post" class="d-inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('complete_mission') }}">
-                            <button type="submit" class="btn btn-success me-2" disabled>
-                                <i class="bi bi-check-circle"></i> Terminer la mission
-                            </button>
-                        </form>
-
-                        <form action="{{ path('app_mission_cancel', {'id': mission.id}) }}" method="post" class="d-inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('cancel_mission') }}">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?')">
-                                <i class="bi bi-x-circle"></i> Annuler la mission
-                            </button>
-                        </form>
+                        <!-- Actions -->
+                        <div class="mission-actions mt-4">
+                            <form id="missionForm" method="post" class="d-grid gap-2">
+                                <input type="hidden" name="_token" value="{{ csrf_token('complete' ~ mission.id) }}">
+                                <button type="submit" class="btn btn-success" {% if mission.progress < 100 %}disabled{% endif %}>
+                                    <i class="bi bi-check-circle"></i> Terminer la mission
+                                </button>
+                                
+                                <a href="{{ path('app_mission_cancel', {'id': mission.id}) }}" 
+                                   class="btn btn-danger"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?')">
+                                    <i class="bi bi-x-circle"></i> Annuler la mission
+                                </a>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let progress = 0;
-            const progressBar = document.querySelector('.progress-bar');
-            const missionId = {{ mission.id|default('null') }};
-            const startTime = new Date().getTime();
-            const duration = {{ mission.timeLimit|default(300) }} * 1000; // Convert to milliseconds
-            const completeButton = document.querySelector('button[type="submit"]');
-            const missionForm = document.getElementById('missionForm');
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let progress = {{ mission.progress|default(0) }};
+        const progressBar = document.querySelector('.progress-bar');
+        const completeButton = document.querySelector('#missionForm button');
+        const missionTimer = document.getElementById('missionTimer');
+        const missionLog = document.getElementById('missionLog');
+        const missionForm = document.getElementById('missionForm');
+        const startTime = new Date('{{ mission.startedAt|date('c') }}').getTime();
+        const timeLimit = {{ mission.timeLimit }} * 1000; // Convertir en millisecondes
 
-            function updateProgress() {
-                const currentTime = new Date().getTime();
-                const elapsedTime = currentTime - startTime;
-                progress = Math.min((elapsedTime / duration) * 100, 100);
+        // Gérer la soumission du formulaire de complétion
+        missionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (progress >= 100) {
+                const formData = new FormData(missionForm);
+                
+                fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        appendToLog(['Mission terminée avec succès ! Score final : ' + data.score + '/100']);
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 2000);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la complétion de la mission');
+                });
+            }
+        });
+        
+        function updateTimer() {
+            const now = new Date().getTime();
+            const elapsed = now - startTime;
+            const remaining = timeLimit - elapsed;
+            
+            if (remaining <= 0) {
+                missionTimer.textContent = "Temps écoulé !";
+                missionTimer.classList.remove('bg-primary');
+                missionTimer.classList.add('bg-danger');
+                return;
+            }
+            
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            missionTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
 
+        function appendToLog(messages) {
+            messages.forEach(message => {
+                const now = new Date().toLocaleTimeString();
+                const p = document.createElement('p');
+                p.textContent = `[${now}] ${message}`;
+                missionLog.appendChild(p);
+            });
+            missionLog.scrollTop = missionLog.scrollHeight;
+        }
+
+        function updateProgress() {
+            if (progress < 100) {
+                progress += 1;
                 progressBar.style.width = progress + '%';
                 progressBar.setAttribute('aria-valuenow', progress);
-                progressBar.textContent = Math.round(progress) + '%';
+                progressBar.textContent = progress + '%';
 
                 if (progress >= 100) {
                     completeButton.disabled = false;
-                    return;
                 }
 
                 fetch('{{ path('app_mission_update_progress', {'id': mission.id}) }}', {
@@ -128,73 +216,55 @@
                     body: JSON.stringify({
                         progress: progress
                     })
-                });
-
-                requestAnimationFrame(updateProgress);
-            }
-
-            function updateTimer() {
-                const currentTime = new Date().getTime();
-                const elapsedTime = currentTime - startTime;
-                const remainingTime = Math.max(duration - elapsedTime, 0);
-                
-                const minutes = Math.floor(remainingTime / 60000);
-                const seconds = Math.floor((remainingTime % 60000) / 1000);
-                
-                document.getElementById('missionTimer').textContent = 
-                    minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-
-                if (remainingTime > 0) {
-                    requestAnimationFrame(updateTimer);
-                }
-            }
-
-            if (missionId) {
-                updateProgress();
-                updateTimer();
-            }
-
-            if (missionForm) {
-                missionForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    if (progress >= 100) {
-                        fetch('{{ path('app_mission_complete', {'id': mission.id}) }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.href = '{{ path('app_mission_index') }}';
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.heroEnergy !== null) {
+                        const energyBar = document.querySelector('.energy-bar .progress-bar');
+                        if (energyBar) {
+                            energyBar.style.width = data.heroEnergy + '%';
+                            energyBar.textContent = Math.round(data.heroEnergy) + '%';
+                            
+                            // Mettre à jour la classe de la barre d'énergie
+                            energyBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                            if (data.heroEnergy < 20) {
+                                energyBar.classList.add('bg-danger');
+                            } else if (data.heroEnergy < 50) {
+                                energyBar.classList.add('bg-warning');
                             } else {
-                                alert('Erreur lors de la complétion de la mission');
+                                energyBar.classList.add('bg-success');
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Une erreur est survenue');
-                        });
+                        }
+                    }
+                    
+                    if (data.logs && data.logs.length > 0) {
+                        appendToLog(data.logs);
                     }
                 });
             }
+        }
+
+        // Mettre à jour la progression toutes les 2 secondes
+        const progressInterval = setInterval(() => {
+            if (progress < 100) {
+                updateProgress();
+            } else {
+                clearInterval(progressInterval);
+            }
+        }, 2000);
+
+        // Mettre à jour le timer chaque seconde
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Nettoyage des intervalles quand la page est fermée
+        window.addEventListener('beforeunload', () => {
+            clearInterval(progressInterval);
+            clearInterval(timerInterval);
         });
-        </script>
-    {% endif %}
+    });
+    </script>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="{{ asset('js/hero3d.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if mission.superHero.model3dPath %}
-                new Hero3DViewer('model3dContainer', '{{ asset(mission.superHero.model3dPath) }}');
-            {% endif %}
-        });
-    </script>
 {% endblock %}

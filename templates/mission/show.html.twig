@@ -64,15 +64,20 @@
                         <div class="assigned-hero">
                             <div class="hero-header">
                                 <div class="hero-info">
-                                    {% if mission.superHero.image %}
-                                        <img src="{{ asset('uploads/heroes/' ~ mission.superHero.image) }}" alt="{{ mission.superHero.name }}" class="hero-avatar">
+                                    <h5>Super-héros assigné</h5>
+                                    {% if mission.superHero %}
+                                        <div class="hero-card">
+                                            <div class="hero-details">
+                                                <h6>{{ mission.superHero.name }}</h6>
+                                                <p><strong>Alias:</strong> {{ mission.superHero.alias }}</p>
+                                                {% if mission.superHero.power %}
+                                                    <p><strong>Pouvoir:</strong> {{ mission.superHero.power.name }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">Aucun super-héros assigné</p>
                                     {% endif %}
-                                    <div class="hero-details">
-                                        <span class="hero-name">{{ mission.superHero.name }}</span>
-                                        {% if mission.superHero.power %}
-                                            <span class="hero-power">{{ mission.superHero.power.name }}</span>
-                                        {% endif %}
-                                    </div>
                                 </div>
                                 <div class="hero-energy">
                                     <strong>Energy Level</strong>
