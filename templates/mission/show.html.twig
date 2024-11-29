@@ -13,7 +13,7 @@
             <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Retour aux missions
             </a>
-            <h1 class="mission-title">{{ mission.title }}</h1>
+            <h1 class="mission-title text-light">{{ mission.title }}</h1>
         </div>
         <span class="badge mission-status {% if mission.status == 'completed' %}badge-success{% elseif mission.status == 'in_progress' %}badge-warning{% else %}badge-secondary{% endif %}">
             {{ mission.status|title|replace({'_': ' '}) }}
