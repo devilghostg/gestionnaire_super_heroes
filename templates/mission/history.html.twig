@@ -29,20 +29,20 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Mission</th>
-                        <th>Description</th>
-                        <th>Difficulté</th>
-                        <th>Statut</th>
-                        <th>Héros</th>
-                        <th>Supprimée le</th>
+                        <th class="text-dark">Mission</th>
+                        <th class="text-dark">Description</th>
+                        <th class="text-dark">Difficulté</th>
+                        <th class="text-dark">Statut</th>
+                        <th class="text-dark">Héros</th>
+                        <th class="text-dark">Supprimée le</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for history in mission_history %}
                     <tr>
-                        <td class="text-white">{{ history.title }}</td>
-                        <td class="text-white">{{ history.description }}</td>
-                        <td class="text-white">
+                        <td class="text-dark">{{ history.title }}</td>
+                        <td class="text-dark">{{ history.description }}</td>
+                        <td class="text-dark">
                             {% for i in 1..5 %}
                                 {% if i <= history.difficulty %}
                                     <i class="bi bi-star-fill text-warning"></i>
@@ -51,7 +51,7 @@
                                 {% endif %}
                             {% endfor %}
                         </td>
-                        <td class="text-white">
+                        <td class="text-dark">
                             {% if history.status == 'completed' %}
                                 <span class="badge bg-success">Terminée</span>
                             {% elseif history.status == 'cancelled' %}
@@ -62,8 +62,8 @@
                                 <span class="badge bg-secondary">Inconnue</span>
                             {% endif %}
                         </td>
-                        <td class="text-white">{{ history.heroName ?? 'Non assigné' }}</td>
-                        <td class="text-white">{{ history.deletedAt|date('d/m/Y H:i') }}</td>
+                        <td class="text-dark">{{ history.heroName ?? 'Non assigné' }}</td>
+                        <td class="text-dark">{{ history.deletedAt|date('d/m/Y H:i') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
