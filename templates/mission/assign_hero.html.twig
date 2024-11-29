@@ -14,7 +14,7 @@
         <div class="available-heroes">
             <h2>Héros disponibles</h2>
             
-            <form method="post" action="{{ path('app_mission_assign_hero_post', {'id': mission.id, 'heroId': '__HERO_ID__'}) }}" id="assignHeroForm">
+            <form method="post" action="{{ path('mission_assign_hero_post', {'id': mission.id, 'heroId': '__HERO_ID__'}) }}" id="assignHeroForm">
                 <input type="hidden" name="_token" value="{{ csrf_token('assign_hero' ~ mission.id) }}">
                 <div class="heroes-grid">
                     {% for hero in available_heroes %}
