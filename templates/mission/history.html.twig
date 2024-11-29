@@ -40,9 +40,9 @@
                 <tbody>
                 {% for history in mission_history %}
                     <tr>
-                        <td>{{ history.title }}</td>
-                        <td>{{ history.description }}</td>
-                        <td>
+                        <td class="text-white">{{ history.title }}</td>
+                        <td class="text-white">{{ history.description }}</td>
+                        <td class="text-white">
                             {% for i in 1..5 %}
                                 {% if i <= history.difficulty %}
                                     <i class="bi bi-star-fill text-warning"></i>
@@ -51,7 +51,7 @@
                                 {% endif %}
                             {% endfor %}
                         </td>
-                        <td>
+                        <td class="text-white">
                             {% if history.status == 'completed' %}
                                 <span class="badge bg-success">Terminée</span>
                             {% elseif history.status == 'cancelled' %}
@@ -59,11 +59,11 @@
                             {% elseif history.status == 'in_progress' %}
                                 <span class="badge bg-warning">En cours</span>
                             {% else %}
-                                <span class="badge bg-secondary">En attente</span>
+                                <span class="badge bg-secondary">Inconnue</span>
                             {% endif %}
                         </td>
-                        <td>{{ history.heroName ?? 'Non assigné' }}</td>
-                        <td>{{ history.deletedAt|date('d/m/Y H:i') }}</td>
+                        <td class="text-white">{{ history.heroName ?? 'Non assigné' }}</td>
+                        <td class="text-white">{{ history.deletedAt|date('d/m/Y H:i') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
