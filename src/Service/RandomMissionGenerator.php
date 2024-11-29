@@ -62,14 +62,13 @@ class RandomMissionGenerator
 
     public function generateMission(string $difficulty): Mission
     {
-        // Convertir la difficulté en entier
-        $difficultyMap = [
-            'easy' => 1,
-            'medium' => 2,
-            'hard' => 3
-        ];
-
-        $difficultyLevel = $difficultyMap[$difficulty] ?? null;
+        // Convertir la difficulté en niveau (1-3)
+        $difficultyLevel = match ((int)$difficulty) {
+            1, 2 => 1,    // Très Facile et Facile -> Facile
+            3 => 2,       // Moyenne -> Moyenne
+            4, 5 => 3,    // Difficile et Très Difficile -> Difficile
+            default => throw new \InvalidArgumentException('Difficulté invalide')
+        };
 
         if (!isset($this->missionTemplates[$difficultyLevel])) {
             throw new \InvalidArgumentException('Difficulté invalide');
@@ -82,7 +81,7 @@ class RandomMissionGenerator
         $mission->setTitle($template['title']);
         $mission->setDescription($template['description']);
         $mission->setTimeLimit($template['timeLimit']);
-        $mission->setDifficulty($difficultyLevel);
+        $mission->setDifficulty((int)$difficulty); // Garder la difficulté originale (1-5)
         $mission->setStatus('pending');
         return $mission;
     }

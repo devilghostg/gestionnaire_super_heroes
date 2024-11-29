@@ -33,10 +33,12 @@ class MissionController extends AbstractController
     {
         // Créer une requête DQL pour charger les missions avec leurs héros et pouvoirs
         $dql = "
-            SELECT m, h, p
+            SELECT m, a, h, p
             FROM App\Entity\Mission m
-            LEFT JOIN m.superHero h
+            LEFT JOIN m.assignments a
+            LEFT JOIN a.hero h
             LEFT JOIN h.powers p
+            WHERE a.isActive = true OR a.isActive IS NULL
             ORDER BY m.id DESC
         ";
         
@@ -147,13 +149,29 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/start', name: 'app_mission_start', methods: ['GET'])]
+    #[Route('/{id}/start', name: 'app_mission_start', methods: ['POST'])]
     public function startMission(Mission $mission, EntityManagerInterface $entityManager): Response
     {
         // Vérifier si la mission peut être démarrée
-        if ($mission->getStatus() !== 'pending' || $mission->getActiveAssignments()->isEmpty()) {
-            $this->addFlash('error', 'Cette mission ne peut pas être démarrée.');
+        if ($mission->getStatus() !== 'pending') {
+            $this->addFlash('error', 'Cette mission ne peut pas être démarrée car elle n\'est pas en attente.');
             return $this->redirectToRoute('app_mission_index');
+        }
+
+        // Vérifier les héros assignés
+        $activeAssignments = $mission->getActiveAssignments();
+        if ($activeAssignments->isEmpty()) {
+            $this->addFlash('error', 'Il n\'y a pas de héros assignés à cette mission.');
+            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        }
+
+        // Vérifier l'énergie des héros
+        foreach ($activeAssignments as $assignment) {
+            $hero = $assignment->getHero();
+            if ($hero->getEnergy() < 20) {
+                $this->addFlash('error', sprintf('Le héros %s n\'a pas assez d\'énergie pour cette mission.', $hero->getName()));
+                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            }
         }
 
         // Démarrer la mission
@@ -385,7 +403,16 @@ class MissionController extends AbstractController
             ->getOneOrNullResult();
             
             if ($hero) {
-                $mission->setSuperHero($hero);
+                // Créer une nouvelle assignation
+                $assignment = new MissionAssignment();
+                $assignment->setMission($mission)
+                          ->setHero($hero)
+                          ->setIsActive(true)
+                          ->setAssignedAt(new \DateTimeImmutable())
+                          ->setEnergy($hero->getEnergy());
+
+                $entityManager->persist($assignment);
+                $mission->addAssignment($assignment);
                 $entityManager->flush();
                 
                 $this->addFlash('success', 'Héros assigné avec succès à la mission.');
@@ -399,9 +426,9 @@ class MissionController extends AbstractController
             FROM App\Entity\SuperHero h 
             LEFT JOIN h.powers p 
             WHERE h.id NOT IN (
-                SELECT IDENTITY(m.superHero) 
-                FROM App\Entity\Mission m 
-                WHERE m.superHero IS NOT NULL
+                SELECT IDENTITY(ma.hero) 
+                FROM App\Entity\MissionAssignment ma
+                WHERE ma.isActive = true
             )'
         )->getResult();
         
@@ -509,7 +536,7 @@ class MissionController extends AbstractController
         // Sauvegarder les noms des héros assignés
         $heroNames = [];
         foreach ($mission->getAssignments() as $assignment) {
-            if ($assignment->isIsActive()) {
+            if ($assignment->isActive()) {
                 $heroNames[] = $assignment->getHero()->getName();
             }
         }
