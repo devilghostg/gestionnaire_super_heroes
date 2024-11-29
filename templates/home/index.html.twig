@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Gestionnaire de Super-Héros{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-light mb-4">Gestionnaire de Super-Héros</h1>
+        <p class="lead text-light">Bienvenue dans votre centre de contrôle des super-héros</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        {# Gestion des Héros #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-dark text-light h-100 border-light">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-badge display-4 mb-3"></i>
+                    <h3 class="card-title">Super-Héros</h3>
+                    <p class="card-text">Gérez vos super-héros et leurs pouvoirs</p>
+                    <a href="{{ path('app_super_hero_index') }}" class="btn btn-outline-light btn-lg mt-3">
+                        <i class="bi bi-arrow-right-circle"></i> Accéder
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Gestion des Missions #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-dark text-light h-100 border-light">
+                <div class="card-body text-center">
+                    <i class="bi bi-journal-text display-4 mb-3"></i>
+                    <h3 class="card-title">Missions</h3>
+                    <p class="card-text">Gérez les missions et assignez des héros</p>
+                    <a href="{{ path('app_mission_index') }}" class="btn btn-outline-light btn-lg mt-3">
+                        <i class="bi bi-arrow-right-circle"></i> Accéder
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Gestion des Équipes #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-dark text-light h-100 border-light">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 mb-3"></i>
+                    <h3 class="card-title">Équipes</h3>
+                    <p class="card-text">Gérez les équipes de super-héros</p>
+                    <a href="{{ path('app_team_index') }}" class="btn btn-outline-light btn-lg mt-3">
+                        <i class="bi bi-arrow-right-circle"></i> Accéder
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {# Gestion des Pouvoirs #}
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-dark text-light h-100 border-light">
+                <div class="card-body text-center">
+                    <i class="bi bi-lightning display-4 mb-3"></i>
+                    <h3 class="card-title">Pouvoirs</h3>
+                    <p class="card-text">Gérez les pouvoirs disponibles</p>
+                    <a href="{{ path('app_power_index') }}" class="btn btn-outline-light btn-lg mt-3">
+                        <i class="bi bi-arrow-right-circle"></i> Accéder
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Boutons supplémentaires #}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <a href="{{ path('app_mission_history') }}" class="btn btn-outline-light btn-lg mx-2">
+                <i class="bi bi-clock-history"></i> Historique des Missions
+            </a>
+            <a href="{{ path('app_mission_random') }}" class="btn btn-outline-warning btn-lg mx-2">
+                <i class="bi bi-dice-5"></i> Mission Aléatoire
+            </a>
+        </div>
+    </div>
+</div>
+
+{# Ajout d'un effet de particules en arrière-plan #}
+<div id="particles-js" class="particles-container"></div>
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#ffffff' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5, random: false },
+            size: { value: 3, random: true },
+            line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: { enable: true, mode: 'repulse' },
+                onclick: { enable: true, mode: 'push' },
+                resize: true
+            }
+        },
+        retina_detect: true
+    });
+});
+</script>
+{% endblock %}
+
+<style>
+.particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn {
+    transition: all 0.3s ease-in-out;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}
