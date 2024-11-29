@@ -151,7 +151,7 @@ class MissionController extends AbstractController
     public function startMission(Mission $mission, EntityManagerInterface $entityManager): Response
     {
         // Vérifier si la mission peut être démarrée
-        if ($mission->getStatus() !== 'pending' || !$mission->getSuperHero()) {
+        if ($mission->getStatus() !== 'pending' || $mission->getActiveAssignments()->isEmpty()) {
             $this->addFlash('error', 'Cette mission ne peut pas être démarrée.');
             return $this->redirectToRoute('app_mission_index');
         }

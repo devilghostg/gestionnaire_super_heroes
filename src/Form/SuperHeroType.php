@@ -27,10 +27,12 @@ class SuperHeroType extends AbstractType
             ->add('power', EntityType::class, [ 
                 'class' => Power::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Choisissez un pouvoir',
+                'multiple' => true,
+                'expanded' => false,
+                'placeholder' => 'Choisissez des pouvoirs',
                 'required' => false,
-                'label' => 'Pouvoir',
-                'attr' => ['class' => 'form-control'],
+                'label' => 'Pouvoirs',
+                'attr' => ['class' => 'form-select'],
             ])
             ->add('weakness', null, [
                 'label' => 'Faiblesse',
