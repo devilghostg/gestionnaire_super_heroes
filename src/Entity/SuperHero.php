@@ -39,9 +39,6 @@ class SuperHero
     #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'superHeroes')]
     private ?Team $team = null;
 
-    #[ORM\OneToMany(mappedBy: 'superHero', targetEntity: Mission::class)]
-    private Collection $missions;
-
     #[ORM\ManyToMany(targetEntity: Power::class)]
     private Collection $powers;
 
@@ -57,11 +54,10 @@ class SuperHero
 
     public function __construct()
     {
-        $this->missions = new ArrayCollection();
+        $this->missionAssignments = new ArrayCollection();
         $this->powers = new ArrayCollection();
         $this->energy = 100;
         $this->is_active = false;
-        $this->missionAssignments = new ArrayCollection();
     }
 
     // Getter et Setter pour l'ID
@@ -155,33 +151,6 @@ class SuperHero
     public function setTeam(?Team $team): static
     {
         $this->team = $team;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Mission>
-     */
-    public function getMissions(): Collection
-    {
-        return $this->missions;
-    }
-
-    public function addMission(Mission $mission): self
-    {
-        if (!$this->missions->contains($mission)) {
-            $this->missions[] = $mission;
-            $mission->setSuperHero($this);
-        }
-        return $this;
-    }
-
-    public function removeMission(Mission $mission): self
-    {
-        if ($this->missions->removeElement($mission)) {
-            if ($mission->getSuperHero() === $this) {
-                $mission->setSuperHero(null);
-            }
-        }
         return $this;
     }
 
