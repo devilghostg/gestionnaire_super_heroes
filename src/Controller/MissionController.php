@@ -28,7 +28,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/mission')]
 class MissionController extends AbstractController
 {
-    #[Route('/', name: 'app_mission_index', methods: ['GET'])]
+    #[Route('/', name: 'mission_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
         // Créer une requête DQL pour charger les missions avec leurs héros et pouvoirs
@@ -66,13 +66,13 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/create-random', name: 'app_mission_random', methods: ['GET', 'POST'])]
+    #[Route('/create-random', name: 'mission_create_random', methods: ['GET', 'POST'])]
     public function random(Request $request, EntityManagerInterface $entityManager, RandomMissionGenerator $generator): Response
     {
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('random_mission', $request->request->get('_token'))) {
                 $this->addFlash('error', 'Token CSRF invalide');
-                return $this->redirectToRoute('app_mission_index');
+                return $this->redirectToRoute('mission_index');
             }
 
             $difficulty = $request->request->get('difficulty');
@@ -87,7 +87,7 @@ class MissionController extends AbstractController
                 $entityManager->flush();
 
                 $this->addFlash('success', 'Mission aléatoire créée avec succès !');
-                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+                return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la création de la mission : ' . $e->getMessage());
             }
@@ -96,7 +96,7 @@ class MissionController extends AbstractController
         return $this->render('mission/random.html.twig');
     }
 
-    #[Route('/history', name: 'app_mission_history', methods: ['GET'])]
+    #[Route('/history', name: 'mission_history', methods: ['GET'])]
     public function history(MissionHistoryRepository $missionHistoryRepository): Response
     {
         return $this->render('mission/history.html.twig', [
@@ -104,7 +104,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/history/clear', name: 'app_mission_history_clear', methods: ['POST'])]
+    #[Route('/history/clear', name: 'mission_history_clear', methods: ['POST'])]
     public function clearHistory(MissionHistoryRepository $missionHistoryRepository, EntityManagerInterface $entityManager): Response
     {
         $histories = $missionHistoryRepository->findAll();
@@ -116,10 +116,10 @@ class MissionController extends AbstractController
         $entityManager->flush();
         
         $this->addFlash('success', 'Historique effacé avec succès');
-        return $this->redirectToRoute('app_mission_history');
+        return $this->redirectToRoute('mission_history');
     }
 
-    #[Route('/new', name: 'app_mission_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'mission_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $mission = new Mission();
@@ -131,7 +131,7 @@ class MissionController extends AbstractController
             $entityManager->persist($mission);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_mission_index');
+            return $this->redirectToRoute('mission_index');
         }
 
         return $this->render('mission/new.html.twig', [
@@ -140,7 +140,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_mission_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'mission_show', methods: ['GET'])]
     public function show(Mission $mission, SuperHeroRepository $superHeroRepository): Response
     {
         return $this->render('mission/show.html.twig', [
@@ -149,20 +149,20 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/start', name: 'app_mission_start', methods: ['POST'])]
+    #[Route('/{id}/start', name: 'mission_start', methods: ['POST'])]
     public function startMission(Mission $mission, EntityManagerInterface $entityManager): Response
     {
         // Vérifier si la mission peut être démarrée
         if ($mission->getStatus() !== 'pending') {
             $this->addFlash('error', 'Cette mission ne peut pas être démarrée car elle n\'est pas en attente.');
-            return $this->redirectToRoute('app_mission_index');
+            return $this->redirectToRoute('mission_index');
         }
 
         // Vérifier les héros assignés
         $activeAssignments = $mission->getActiveAssignments();
         if ($activeAssignments->isEmpty()) {
             $this->addFlash('error', 'Il n\'y a pas de héros assignés à cette mission.');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         // Vérifier l'énergie des héros
@@ -170,7 +170,7 @@ class MissionController extends AbstractController
             $hero = $assignment->getHero();
             if ($hero->getEnergy() < 20) {
                 $this->addFlash('error', sprintf('Le héros %s n\'a pas assez d\'énergie pour cette mission.', $hero->getName()));
-                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+                return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
             }
         }
 
@@ -184,18 +184,18 @@ class MissionController extends AbstractController
         $this->addFlash('success', 'La mission a été démarrée avec succès !');
         
         // Rediriger vers la page de progression
-        return $this->redirectToRoute('app_mission_progress', [
+        return $this->redirectToRoute('mission_progress', [
             'id' => $mission->getId()
         ]);
     }
 
-    #[Route('/{id}/progress', name: 'app_mission_progress', methods: ['GET'])]
+    #[Route('/{id}/progress', name: 'mission_progress', methods: ['GET'])]
     public function progress(
         Mission $mission,
         EnergyRechargeService $energyRechargeService
     ): Response {
         if ($mission->getStatus() !== 'in_progress') {
-            return $this->redirectToRoute('app_mission_index');
+            return $this->redirectToRoute('mission_index');
         }
 
         // Vérifier si les héros ont assez d'énergie
@@ -211,7 +211,7 @@ class MissionController extends AbstractController
 
         if ($mission->getActiveAssignments()->isEmpty()) {
             $this->addFlash('error', 'Il n\'y a plus de héros disponibles pour cette mission !');
-            return $this->redirectToRoute('app_mission_index');
+            return $this->redirectToRoute('mission_index');
         }
 
         return $this->render('mission/progress.html.twig', [
@@ -219,7 +219,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/progress/update', name: 'app_mission_update_progress', methods: ['POST'])]
+    #[Route('/{id}/progress/update', name: 'mission_update_progress', methods: ['POST'])]
     public function updateProgress(
         Mission $mission,
         Request $request,
@@ -266,7 +266,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/complete', name: 'app_mission_complete', methods: ['POST'])]
+    #[Route('/{id}/complete', name: 'mission_complete', methods: ['POST'])]
     public function completeMission(
         Mission $mission,
         Request $request,
@@ -275,12 +275,12 @@ class MissionController extends AbstractController
     ): Response {
         if (!$this->isCsrfTokenValid('complete'.$mission->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         if ($mission->getStatus() !== 'in_progress') {
             $this->addFlash('error', 'Cette mission ne peut pas être terminée');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         // Créer un historique de la mission
@@ -310,10 +310,10 @@ class MissionController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'Mission terminée avec succès ! Les héros peuvent maintenant se reposer.');
-        return $this->redirectToRoute('app_mission_index');
+        return $this->redirectToRoute('mission_index');
     }
 
-    #[Route('/{id}/cancel', name: 'app_mission_cancel', methods: ['POST'])]
+    #[Route('/{id}/cancel', name: 'mission_cancel', methods: ['POST'])]
     public function cancel(Request $request, Mission $mission, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('cancel'.$mission->getId(), $request->request->get('_token'))) {
@@ -344,10 +344,10 @@ class MissionController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
     }
 
-    #[Route('/{id}/remove', name: 'app_mission_remove', methods: ['POST'])]
+    #[Route('/{id}/remove', name: 'mission_remove', methods: ['POST'])]
     public function delete(
         Request $request,
         Mission $mission,
@@ -365,10 +365,10 @@ class MissionController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_mission_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('mission_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/edit', name: 'app_mission_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'mission_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Mission $mission, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(MissionType::class, $mission);
@@ -377,7 +377,7 @@ class MissionController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
             $this->addFlash('success', 'Mission updated successfully.');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         return $this->render('mission/edit.html.twig', [
@@ -386,7 +386,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/assign-hero', name: 'app_mission_assign_hero', methods: ['GET', 'POST'])]
+    #[Route('/{id}/assign-hero', name: 'mission_assign_hero', methods: ['GET', 'POST'])]
     public function assignHero(Request $request, Mission $mission, EntityManagerInterface $entityManager, SuperHeroRepository $superHeroRepository): Response
     {
         if ($request->isMethod('POST')) {
@@ -416,7 +416,7 @@ class MissionController extends AbstractController
                 $entityManager->flush();
                 
                 $this->addFlash('success', 'Héros assigné avec succès à la mission.');
-                return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+                return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
             }
         }
         
@@ -438,7 +438,7 @@ class MissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/assign-hero/{heroId}', name: 'app_mission_assign_hero_post', methods: ['POST'])]
+    #[Route('/{id}/assign-hero/{heroId}', name: 'mission_assign_hero_post', methods: ['POST'])]
     public function assignHeroPost(
         Mission $mission,
         int $heroId,
@@ -448,30 +448,30 @@ class MissionController extends AbstractController
     ): Response {
         if (!$this->isCsrfTokenValid('assign_hero'.$mission->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         if ($mission->getStatus() !== 'pending') {
             $this->addFlash('error', 'Cette mission n\'est pas disponible pour l\'assignation');
-            return $this->redirectToRoute('app_mission_index');
+            return $this->redirectToRoute('mission_index');
         }
 
         $hero = $superHeroRepository->find($heroId);
         if (!$hero) {
             $this->addFlash('error', 'Héros non trouvé');
-            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_assign_hero', ['id' => $mission->getId()]);
         }
 
         // Vérifier si le héros n'est pas déjà assigné
         if ($mission->hasActiveHero($hero)) {
             $this->addFlash('error', 'Ce héros est déjà assigné à cette mission');
-            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_assign_hero', ['id' => $mission->getId()]);
         }
 
         // Vérifier l'énergie du héros
         if ($hero->getEnergy() < 20) {
             $this->addFlash('error', 'Le héros n\'a pas assez d\'énergie pour cette mission');
-            return $this->redirectToRoute('app_mission_assign_hero', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_assign_hero', ['id' => $mission->getId()]);
         }
 
         // Créer une nouvelle assignation
@@ -487,10 +487,10 @@ class MissionController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'Héros assigné avec succès à la mission');
-        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
     }
 
-    #[Route('/{id}/remove-hero/{assignment}', name: 'app_mission_remove_hero', methods: ['POST'])]
+    #[Route('/{id}/remove-hero/{assignment}', name: 'mission_remove_hero', methods: ['POST'])]
     public function removeHero(
         Mission $mission,
         MissionAssignment $assignment,
@@ -499,24 +499,24 @@ class MissionController extends AbstractController
     ): Response {
         if ($assignment->getMission() !== $mission) {
             $this->addFlash('error', 'Cet assignment n\'appartient pas à cette mission');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         if (!$this->isCsrfTokenValid('remove_hero'.$assignment->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         if ($mission->getStatus() !== 'pending') {
             $this->addFlash('error', 'Impossible de retirer un héros d\'une mission en cours ou terminée');
-            return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+            return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
         }
 
         $entityManager->remove($assignment);
         $entityManager->flush();
 
         $this->addFlash('success', 'Le héros a été retiré de la mission avec succès');
-        return $this->redirectToRoute('app_mission_show', ['id' => $mission->getId()]);
+        return $this->redirectToRoute('mission_show', ['id' => $mission->getId()]);
     }
 
     private function archiveAndDeleteMission(

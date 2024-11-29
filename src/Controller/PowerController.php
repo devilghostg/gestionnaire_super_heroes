@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 
+#[Route('/power')]
 class PowerController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -26,7 +27,7 @@ class PowerController extends AbstractController
     }
 
     // Liste des pouvoirs
-    #[Route('/powers', name: 'power_index')]
+    #[Route('/', name: 'app_power_index')]
     public function index(): Response
     {
         // Récupération de tous les pouvoirs
@@ -39,7 +40,7 @@ class PowerController extends AbstractController
     }
 
     // Création d'un nouveau pouvoir
-    #[Route('/powers/new', name: 'power_new')]
+    #[Route('/new', name: 'app_power_new')]
     public function new(Request $request): Response
     {
         $power = new Power();
@@ -53,7 +54,7 @@ class PowerController extends AbstractController
             $this->entityManager->flush();
 
             // Redirection vers la page de détails du nouveau pouvoir
-            return $this->redirectToRoute('power_show', ['id' => $power->getId()]);
+            return $this->redirectToRoute('app_power_show', ['id' => $power->getId()]);
         }
 
         // Rendu de la vue pour créer un pouvoir
@@ -63,7 +64,7 @@ class PowerController extends AbstractController
     }
 
     // Affichage des détails d'un pouvoir
-    #[Route('/powers/{id}', name: 'power_show')]
+    #[Route('/{id}', name: 'app_power_show')]
     public function show(Power $power): Response
     {
         // Rendu de la vue pour afficher un pouvoir spécifique
@@ -73,7 +74,7 @@ class PowerController extends AbstractController
     }
 
     // Modification d'un pouvoir existant
-    #[Route('/powers/{id}/edit', name: 'power_edit')]
+    #[Route('/{id}/edit', name: 'app_power_edit')]
     public function edit(Request $request, Power $power): Response
     {
         // Création du formulaire pour éditer un pouvoir
@@ -87,7 +88,7 @@ class PowerController extends AbstractController
             $this->entityManager->flush();
 
             // Redirection vers la page de détails du pouvoir modifié
-            return $this->redirectToRoute('power_show', ['id' => $power->getId()]);
+            return $this->redirectToRoute('app_power_show', ['id' => $power->getId()]);
         }
 
         // Rendu de la vue pour modifier un pouvoir
@@ -98,7 +99,7 @@ class PowerController extends AbstractController
     }
 
     // Suppression d'un pouvoir
-    #[Route('/powers/{id}/delete', name: 'power_delete')]
+    #[Route('/{id}/delete', name: 'app_power_delete')]
     public function delete(Request $request, Power $power): Response
     {
         // Vérification que la requête est une suppression (par exemple un formulaire POST)
@@ -108,7 +109,6 @@ class PowerController extends AbstractController
         }
 
         // Redirection vers la liste des pouvoirs après suppression
-        return $this->redirectToRoute('power_index');
+        return $this->redirectToRoute('app_power_index');
     }
-    
 }

@@ -93,11 +93,25 @@
 
         <nav class="navbar">
             <div class="container">
-                <a class="navbar-brand" href="{{ path('app_super_hero_index') }}"> Super Heroes</a>
+                <a class="navbar-brand" href="{{ path('app_home') }}">
+                    Super Heroes
+                </a>
                 <ul class="navbar-nav">
-                    <li><a class="nav-link" href="{{ path('app_super_hero_index') }}"><i class="fas fa-mask"></i> Heroes</a></li>
-                    <li><a class="nav-link" href="{{ path('app_team_index') }}"><i class="fas fa-users"></i> Teams</a></li>
-                    <li><a class="nav-link" href="{{ path('app_mission_index') }}"><i class="fas fa-tasks"></i> Missions</a></li>
+                    <li>
+                        <a class="nav-link" href="{{ path('app_super_hero_index') }}">
+                            <i class="fas fa-mask"></i> Heroes
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ path('app_team_index') }}">
+                            <i class="fas fa-users"></i> Teams
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ path('mission_index') }}">
+                            <i class="fas fa-tasks"></i> Missions
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -134,7 +148,7 @@
                 <div class="footer-section">
                     <h3 class="footer-title">Missions</h3>
                     <div class="footer-links">
-                        <a href="{{ path('app_mission_index') }}" class="footer-link">
+                        <a href="{{ path('mission_index') }}" class="footer-link">
                             <i class="fas fa-tasks"></i> Liste des Missions
                         </a>
                         <a href="#" class="footer-link">

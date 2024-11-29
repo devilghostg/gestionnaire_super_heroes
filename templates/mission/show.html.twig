@@ -10,7 +10,7 @@
 {% block body %}
     <div class="mission-header">
         <div class="header-content">
-            <a href="{{ path('app_mission_index') }}" class="btn btn-secondary">
+            <a href="{{ path('mission_index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Retour aux missions
             </a>
             <h1 class="mission-title text-light">{{ mission.title }}</h1>
@@ -61,7 +61,7 @@
                                         <h4>{{ assignment.hero.name }}</h4>
                                         <p>Énergie: {{ assignment.energy }}%</p>
                                         <p>Assigné le: {{ assignment.assignedAt|date('Y-m-d H:i') }}</p>
-                                        <form method="post" action="{{ path('app_mission_remove_hero', {'id': mission.id, 'assignment': assignment.id}) }}" class="mt-2" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce héros ?');">
+                                        <form method="post" action="{{ path('mission_remove_hero', {'id': mission.id, 'assignment': assignment.id}) }}" class="mt-2" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce héros ?');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('remove_hero' ~ assignment.id) }}">
                                             <button type="submit" class="btn btn-danger btn-sm">
                                                 <i class="fas fa-user-minus"></i> Retirer
@@ -71,7 +71,7 @@
                                 {% endfor %}
                             </div>
 
-                            <form method="post" action="{{ path('app_mission_start', {'id': mission.id}) }}" class="mt-3">
+                            <form method="post" action="{{ path('mission_start', {'id': mission.id}) }}" class="mt-3">
                                 <input type="hidden" name="_token" value="{{ csrf_token('start' ~ mission.id) }}">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fas fa-play"></i> Lancer la mission
@@ -81,7 +81,7 @@
                             <p>Aucun héros assigné pour le moment.</p>
                         {% endif %}
 
-                        <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
+                        <a href="{{ path('mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
                             Assigner un héros
                         </a>
                     </div>
@@ -92,18 +92,18 @@
                 <h3 class="actions-title">Actions</h3>
                 <div class="actions-group">
                     {% if mission.status == 'pending' %}
-                        <a href="{{ path('app_mission_edit', {'id': mission.id}) }}" class="btn btn-secondary" style="width: 100%;">
+                        <a href="{{ path('mission_edit', {'id': mission.id}) }}" class="btn btn-secondary" style="width: 100%;">
                             <i class="fas fa-edit"></i> Modifier la mission
                         </a>
                     {% endif %}
 
                     {% if mission.status != 'completed' %}
-                        <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn" style="width: 100%; background: #FF9800;">
+                        <a href="{{ path('mission_progress', {'id': mission.id}) }}" class="btn" style="width: 100%; background: #FF9800;">
                             <i class="fas fa-tasks"></i> Mettre à jour la progression
                         </a>
 
                         {% if mission.status == 'in_progress' %}
-                            <form method="post" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');" style="width: 100%;">
+                            <form method="post" action="{{ path('mission_cancel', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');" style="width: 100%;">
                                 <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
                                 <button type="submit" class="btn btn-danger" style="width: 100%;">
                                     <i class="fas fa-times"></i> Annuler la mission
@@ -113,7 +113,7 @@
                     {% endif %}
 
                     {% if mission.status == 'completed' or mission.status == 'cancelled' %}
-                        <form method="post" action="{{ path('app_mission_remove', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');" style="width: 100%;">
+                        <form method="post" action="{{ path('mission_remove', {'id': mission.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');" style="width: 100%;">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mission.id) }}">
                             <button class="btn btn-danger" style="width: 100%;">
                                 <i class="fas fa-trash"></i> Supprimer la mission
