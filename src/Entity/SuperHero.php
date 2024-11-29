@@ -258,9 +258,7 @@ class SuperHero
 
     public function isAvailableForMission(): bool
     {
-        return !$this->missionAssignments->exists(
-            fn(int $key, MissionAssignment $a) => $a->isActive()
-        );
+        return $this->isActive() && $this->getCurrentMissionAssignment() === null;
     }
 
     public function getCurrentMissionAssignment(): ?MissionAssignment
