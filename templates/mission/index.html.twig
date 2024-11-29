@@ -51,39 +51,41 @@
                             <div class="mission-info-section">
                                 <div class="mission-heroes">
                                     <strong>Héros assignés:</strong>
-                                    {% if mission.superHero %}
+                                    {% if mission.activeAssignments|length > 0 %}
                                         <div class="heroes-list">
-                                            <div class="hero-card">
-                                                <div class="hero-info">
-                                                    <span class="hero-name">{{ mission.superHero.name }}</span>
-                                                    <div class="hero-stats">
-                                                        <div class="energy-bar">
-                                                            <span class="label">Énergie:</span>
-                                                            <div class="progress">
-                                                                <div class="progress-bar" 
-                                                                     role="progressbar" 
-                                                                     style="width: {{ mission.superHero.energy }}%"
-                                                                     aria-valuenow="{{ mission.superHero.energy }}" 
-                                                                     aria-valuemin="0" 
-                                                                     aria-valuemax="100">
-                                                                    {{ mission.superHero.energy }}%
+                                            {% for assignment in mission.activeAssignments %}
+                                                <div class="hero-card">
+                                                    <div class="hero-info">
+                                                        <span class="hero-name">{{ assignment.hero.name }}</span>
+                                                        <div class="hero-stats">
+                                                            <div class="energy-bar">
+                                                                <span class="label">Énergie:</span>
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" 
+                                                                         role="progressbar" 
+                                                                         style="width: {{ assignment.energy }}%"
+                                                                         aria-valuenow="{{ assignment.energy }}" 
+                                                                         aria-valuemin="0" 
+                                                                         aria-valuemax="100">
+                                                                        {{ assignment.energy }}%
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="hero-powers">
-                                                            <span class="label">Pouvoirs:</span>
-                                                            <div class="powers-list">
-                                                                {% for power in mission.superHero.powers %}
-                                                                    <span class="power-badge">{{ power.name }}</span>
-                                                                {% endfor %}
+                                                            <div class="hero-powers">
+                                                                <span class="label">Pouvoirs:</span>
+                                                                <div class="powers-list">
+                                                                    {% for power in assignment.hero.powers %}
+                                                                        <span class="power-badge">{{ power.name }}</span>
+                                                                    {% endfor %}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            {% endfor %}
                                         </div>
                                     {% else %}
-                                        <p class="no-heroes">Aucun héros assigné pour le moment</p>
+                                        <p class="no-heroes">Aucun héros assigné</p>
                                     {% endif %}
                                 </div>
                                 
@@ -116,10 +118,13 @@
                             {% endif %}
                             <div class="mission-actions">
                                 {% if mission.status == 'pending' %}
-                                    {% if mission.superHero %}
-                                        <a href="{{ path('app_mission_start', {'id': mission.id}) }}" class="btn btn-primary">
-                                            <i class="bi bi-play-fill"></i> Lancer la mission
-                                        </a>
+                                    {% if mission.activeAssignments|length > 0 %}
+                                        <form method="post" action="{{ path('app_mission_start', {'id': mission.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('start' ~ mission.id) }}">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-play-fill"></i> Lancer la mission
+                                            </button>
+                                        </form>
                                     {% endif %}
                                 {% elseif mission.status == 'in_progress' %}
                                     <a href="{{ path('app_mission_progress', {'id': mission.id}) }}" class="btn btn-info">

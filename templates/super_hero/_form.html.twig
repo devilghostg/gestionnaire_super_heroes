@@ -3,23 +3,7 @@
     {% for field in form %}
         {% if field.vars.name != '_token' %}
             <div class="form-group" style="width: 100%;">
-                {% if field.vars.name == 'is_active' %}
-                    <div class="form-check form-switch" style="background: #f8f9fa; padding: 1rem; border-radius: 10px;">
-                        {{ form_widget(field, {
-                            'attr': {
-                                'class': 'form-check-input',
-                                'role': 'switch',
-                                'style': 'width: 3em; height: 1.5em; margin-right: 1rem;'
-                            }
-                        }) }}
-                        {{ form_label(field, 'Super-héros actif', {
-                            'label_attr': {
-                                'class': 'form-check-label',
-                                'style': 'font-size: 1.1rem; color: #333;'
-                            }
-                        }) }}
-                    </div>
-                {% elseif field.vars.name == 'team' %}
+                {% if field.vars.name == 'team' %}
                     <div class="team-selection" style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1rem;">
                         {{ form_label(field, 'Équipe', {
                             'label_attr': {
@@ -76,17 +60,38 @@
                             }
                         }) }}
                     </div>
+                {% elseif field.vars.name == 'is_active' %}
+                    <div class="status-selection" style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
+                        {{ form_label(field, 'Statut', {
+                            'label_attr': {
+                                'class': 'form-label',
+                                'style': 'font-size: 1.2rem; color: #333; margin-bottom: 1rem; display: block;'
+                            }
+                        }) }}
+                        <div class="form-check form-switch">
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-check-input',
+                                    'role': 'switch',
+                                    'style': 'width: 3em; height: 1.5em; margin-right: 1rem;'
+                                }
+                            }) }}
+                            <label class="form-check-label" style="font-size: 1.1rem; color: #333;">
+                                Super-héros actif
+                            </label>
+                        </div>
+                    </div>
                 {% else %}
-                    <div class="input-group" style="width: 100%;">
+                    <div class="input-group" style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
                         {{ form_label(field, null, {
                             'label_attr': {
                                 'class': 'form-label',
-                                'style': 'font-size: 1.1rem; color: #333; width: 100%;'
+                                'style': 'font-size: 1.2rem; color: #333; margin-bottom: 1rem; display: block;'
                             }
                         }) }}
                         {{ form_widget(field, {
                             'attr': {
-                                'class': field.vars.name == 'power' ? 'form-select' : 'form-control',
+                                'class': 'form-control',
                                 'style': 'width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd;'
                             }
                         }) }}

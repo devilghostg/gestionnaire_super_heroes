@@ -40,10 +40,6 @@ class Mission
     #[ORM\Column(type: 'string', length: 20)]
     private ?string $status = 'pending';
 
-    #[ORM\ManyToOne(inversedBy: 'missions')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?SuperHero $superHero = null;
-
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $result = null;
 
@@ -160,17 +156,6 @@ class Mission
         return $this;
     }
 
-    public function getSuperHero(): ?SuperHero
-    {
-        return $this->superHero;
-    }
-
-    public function setSuperHero(?SuperHero $superHero): static
-    {
-        $this->superHero = $superHero;
-        return $this;
-    }
-
     public function getResult(): ?string
     {
         return $this->result;
@@ -260,7 +245,7 @@ class Mission
     public function getActiveAssignments(): Collection
     {
         return $this->assignments->filter(function(MissionAssignment $assignment) {
-            return $assignment->isIsActive();
+            return $assignment->isActive();
         });
     }
 
@@ -276,16 +261,15 @@ class Mission
 
     public function getActiveHeroes(): array
     {
-        return $this->assignments
-            ->filter(fn(MissionAssignment $a) => $a->isIsActive())
+        return $this->getActiveAssignments()
             ->map(fn(MissionAssignment $a) => $a->getHero())
             ->toArray();
     }
 
     public function isHeroAssigned(SuperHero $hero): bool
     {
-        return $this->assignments->exists(
-            fn(int $key, MissionAssignment $a) => $a->getHero() === $hero && $a->isIsActive()
+        return $this->getActiveAssignments()->exists(
+            fn(int $key, MissionAssignment $a) => $a->getHero() === $hero
         );
     }
 }

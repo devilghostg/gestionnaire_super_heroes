@@ -81,11 +81,9 @@
                             <p>Aucun héros assigné pour le moment.</p>
                         {% endif %}
 
-                        {% if not mission.superHero %}
-                            <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
-                                Assigner un héros
-                            </a>
-                        {% endif %}
+                        <a href="{{ path('app_mission_assign_hero', {'id': mission.id}) }}" class="btn btn-primary">
+                            Assigner un héros
+                        </a>
                     </div>
                 {% endif %}
             </div>

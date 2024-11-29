@@ -36,15 +36,19 @@
                         <strong>Alias:</strong>
                         <span>{{ super_hero.alias }}</span>
                     </div>
-                    {% if super_hero.power %}
-                        <div class="detail-item">
-                            <strong>Power:</strong>
-                            <span>{{ super_hero.power.name }}</span>
-                            {% if super_hero.power.description %}
-                                <p class="detail-note">
-                                    {{ super_hero.power.description }}
-                                </p>
-                            {% endif %}
+                    {% if super_hero.powers|length > 0 %}
+                        <div class="detail-item powers-section">
+                            <strong>Pouvoirs:</strong>
+                            <div class="powers-list">
+                                {% for power in super_hero.powers %}
+                                    <div class="power-item">
+                                        <div class="power-name">{{ power.name }}</div>
+                                        {% if power.description %}
+                                            <div class="power-description">{{ power.description }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     {% endif %}
                     {% if super_hero.weakness %}

@@ -14,12 +14,12 @@
         <div class="available-heroes">
             <h2>Héros disponibles</h2>
             
-            <form method="post" action="{{ path('app_mission_assign_hero', {'id': mission.id}) }}">
+            <form method="post" action="{{ path('app_mission_assign_hero_post', {'id': mission.id, 'heroId': '__HERO_ID__'}) }}" id="assignHeroForm">
                 <input type="hidden" name="_token" value="{{ csrf_token('assign_hero' ~ mission.id) }}">
                 <div class="heroes-grid">
                     {% for hero in available_heroes %}
                         <div class="hero-selection-card">
-                            <input type="radio" name="hero_id" value="{{ hero.id }}" id="hero_{{ hero.id }}" class="hero-radio">
+                            <input type="radio" name="hero_id" value="{{ hero.id }}" id="hero_{{ hero.id }}" class="hero-radio" onchange="updateFormAction(this.value)">
                             <label for="hero_{{ hero.id }}" class="hero-label">
                                 <div class="hero-info">
                                     <h3>{{ hero.name }}</h3>
@@ -56,4 +56,15 @@
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function updateFormAction(heroId) {
+            const form = document.getElementById('assignHeroForm');
+            const currentAction = form.getAttribute('action');
+            form.setAttribute('action', currentAction.replace('__HERO_ID__', heroId));
+        }
+    </script>
 {% endblock %}
