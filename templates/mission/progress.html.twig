@@ -84,14 +84,14 @@
 
                         <!-- Actions -->
                         <div class="mission-actions mt-4">
-                            <form id="missionForm" method="post" action="{{ path('app_mission_complete', {'id': mission.id}) }}" class="d-grid gap-2">
+                            <form id="missionForm" method="post" action="{{ path('mission_complete', {'id': mission.id}) }}" class="d-grid gap-2">
                                 <input type="hidden" name="_token" value="{{ csrf_token('complete' ~ mission.id) }}">
                                 <button type="submit" class="btn btn-success" {% if mission.progress < 100 %}disabled{% endif %}>
                                     <i class="bi bi-check-circle"></i> Terminer la mission
                                 </button>
                             </form>
                             
-                            <form method="post" action="{{ path('app_mission_cancel', {'id': mission.id}) }}" class="d-grid gap-2 mt-2" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');">
+                            <form method="post" action="{{ path('mission_cancel', {'id': mission.id}) }}" class="d-grid gap-2 mt-2" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette mission ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ mission.id) }}">
                                 <button type="submit" class="btn btn-danger">
                                     <i class="bi bi-x-circle"></i> Annuler la mission
@@ -134,7 +134,7 @@
 
         // Fonction pour mettre à jour la progression
         function updateProgress() {
-            fetch('{{ path('app_mission_update_progress', {'id': mission.id}) }}', {
+            fetch('{{ path('mission_update_progress', {'id': mission.id}) }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

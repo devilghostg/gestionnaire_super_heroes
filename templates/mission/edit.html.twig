@@ -5,7 +5,7 @@
 {% block body %}
     <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary">
+            <a href="{{ path('mission_show', {'id': mission.id}) }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
@@ -53,7 +53,7 @@
             </div>
 
             <div class="btn-group" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                <a href="{{ path('app_mission_show', {'id': mission.id}) }}" class="btn btn-secondary" style="text-decoration: none;">
+                <a href="{{ path('mission_show', {'id': mission.id}) }}" class="btn btn-secondary" style="text-decoration: none;">
                     <i class="fas fa-times"></i> Cancel
                 </a>
                 <button type="submit" class="btn" style="min-width: 120px;">

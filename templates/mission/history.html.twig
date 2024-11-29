@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-light">Historique des missions</h1>
         {% if mission_history|length > 0 %}
-            <form method="post" action="{{ path('app_mission_history_clear') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir effacer tout l\'historique ?');" class="d-inline">
+            <form method="post" action="{{ path('mission_history_clear') }}" onsubmit="return confirm('Êtes-vous sûr de vouloir effacer tout l\'historique ?');" class="d-inline">
                 <button class="btn btn-danger">
                     <i class="bi bi-trash"></i> Effacer l'historique
                 </button>
